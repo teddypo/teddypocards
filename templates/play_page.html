@@ -6,10 +6,11 @@
 		$(document).ready(function(){
 			setTimeout(function(){
 				console.log('hi')
-				// location.reload();
-			}, 3000);
+				location.reload();
+			}, 5000);
 		})
 	</script>
+	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 
 <body>
@@ -23,13 +24,13 @@
 			<p>
 				{{card.name}}
 				{% if not card.hidden %}
-				<h3>Revealed!</h3>
+				<b>Revealed!</b>
 				{% endif %}
-			</p>
 			<a href={{url_for("hello")}}action/{{user_name}}/reveal_{{card.id}}>Reveal</a>
 			<a href={{url_for("hello")}}action/{{user_name}}/hide_{{card.id}}>Hide</a>
 			<a href={{url_for("hello")}}action/{{user_name}}/grave_{{card.id}}>Grave</a>
 			<a href={{url_for("hello")}}action/{{user_name}}/deck_{{card.id}}>Deck</a>
+			</p>
 			{% else %}
 			{% if card.hidden %}
 			<p>Hidden</p>
@@ -57,10 +58,12 @@
 	<a href={{url_for("hello")}}action/{{user_name}}/claim>ClaimCard</a>
 	<h1>ActivityLog</h1>
 	<ul>
-		{% for activity in activity_log %}
+		{% for activity in activity_log|reverse%}
 		<li>{{activity}} </li>
 		{% endfor %}
 	</ul>
+	<a href={{url_for("hello")}}action/{{user_name}}/reset_0>Reset 0 Player Game</a>
+	<a href={{url_for("hello")}}action/{{user_name}}/reset_1>Reset 1 Player Game</a>
 	<a href={{url_for("hello")}}action/{{user_name}}/reset_2>Reset 2 Player Game</a>
 	<a href={{url_for("hello")}}action/{{user_name}}/reset_3>Reset 3 Player Game</a>
 	<a href={{url_for("hello")}}action/{{user_name}}/reset_4>Reset 4 Player Game</a>
