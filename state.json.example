@@ -1,39 +1,84 @@
 {
-  "players": [
+  "players": [],
+  "deck": [
     {
-	"user_name": "stephen",
-        "n_coins": 10,
-        "cards": [
-          {
-            "hidden": true,
-            "name": "Cantessa",
-	    "id": 1
-          },
-          {
-            "hidden": true,
-            "name": "Assassin",
-	    "id": 2
-          }
-        ]
+      "hidden": true,
+      "name": "Assassin",
+      "id": 1
     },
     {
-	"user_name": "will",
-        "n_coins": 10,
-        "cards": [
-          {
-            "hidden": false,
-            "name": "Duke",
-	    "id": 3
-          },
-          {
-            "hidden": true,
-            "name": "Duke",
-	    "id": 4
-          }
-        ]
+      "hidden": true,
+      "name": "Assassin",
+      "id": 2
+    },
+    {
+      "hidden": true,
+      "name": "Assassin",
+      "id": 3
+    },
+    {
+      "hidden": true,
+      "name": "Cantessa",
+      "id": 4
+    },
+    {
+      "hidden": true,
+      "name": "Cantessa",
+      "id": 5
+    },
+    {
+      "hidden": true,
+      "name": "Cantessa",
+      "id": 6
+    },
+    {
+      "hidden": true,
+      "name": "Ambassador",
+      "id": 7
+    },
+    {
+      "hidden": true,
+      "name": "Ambassador",
+      "id": 8
+    },
+    {
+      "hidden": true,
+      "name": "Ambassador",
+      "id": 9
+    },
+    {
+      "hidden": true,
+      "name": "Captain",
+      "id": 10
+    },
+    {
+      "hidden": true,
+      "name": "Captain",
+      "id": 11
+    },
+    {
+      "hidden": true,
+      "name": "Captain",
+      "id": 12
+    },
+    {
+      "hidden": true,
+      "name": "Duke",
+      "id": 13
+    },
+    {
+      "hidden": true,
+      "name": "Duke",
+      "id": 14
+    },
+    {
+      "hidden": true,
+      "name": "Duke",
+      "id": 15
     }
   ],
-  "deck": ["Cantessa", "Assassin"],
-  "graveyard": ["Duke", "Ambassador"],
-  "activity_log": ["x killed y", "a stole from b"]
+  "graveyard": [],
+  "activity_log": [
+    "steeve did reset_0"
+  ]
 }
