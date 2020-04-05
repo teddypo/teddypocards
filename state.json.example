@@ -1,0 +1,39 @@
+{
+  "players": [
+    {
+	"user_name": "stephen",
+        "n_coins": 10,
+        "cards": [
+          {
+            "hidden": true,
+            "name": "Cantessa",
+	    "id": 1
+          },
+          {
+            "hidden": true,
+            "name": "Assassin",
+	    "id": 2
+          }
+        ]
+    },
+    {
+	"user_name": "will",
+        "n_coins": 10,
+        "cards": [
+          {
+            "hidden": false,
+            "name": "Duke",
+	    "id": 3
+          },
+          {
+            "hidden": true,
+            "name": "Duke",
+	    "id": 4
+          }
+        ]
+    }
+  ],
+  "deck": ["Cantessa", "Assassin"],
+  "graveyard": ["Duke", "Ambassador"],
+  "activity_log": ["x killed y", "a stole from b"]
+}
