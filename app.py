@@ -11,7 +11,7 @@ def hello():
 
 @app.route('/action/<user_name>/<action_string>')
 def action(user_name, action_string):
-    with open('state.json', "r") as statef:
+    with open('/var/www/TeddyPoCards/state.json', "r") as statef:
         state = json.load(statef)
     state['activity_log'] = state.get('activity_log', [])
     act_split = action_string.split('_')
@@ -65,7 +65,7 @@ def action(user_name, action_string):
             if player['user_name'] == user_name:
                 player['cards'].append(card)
     if act_split[0] == 'reset':
-        with open('state_base.json', "r") as statef:
+        with open('/var/www/TeddyPoCards/state_base.json', "r") as statef:
             state = json.load(statef)
         for item in range(int(act_split[1])):
             state['players'].append(dict(user_name = "player" + str(item+1), n_coins = 2, cards = []))
@@ -73,7 +73,7 @@ def action(user_name, action_string):
     print(state)
     state['activity_log'].append(f"{user_name} did {action_string}")
     print (state['players'])
-    with open('state.json', "w") as statef:
+    with open('/var/www/TeddyPoCards/state.json', "w") as statef:
         json.dump(state, statef)
     return redirect(url_for('play_page', user_name=user_name))
 
@@ -81,7 +81,7 @@ def action(user_name, action_string):
 def play_page(user_name):
     n_coins = 0
     players = []
-    with open('state.json') as statef:
+    with open('/var/www/TeddyPoCards/state.json') as statef:
         state = json.load(statef)
     players = state.get('players', [])
     graveyard = state.get('graveyard', [])
@@ -93,6 +93,6 @@ def play_page(user_name):
 
 
 if __name__ == "__main__":
-    app.run()
+    app.run(host='0.0.0.0')
 
 
