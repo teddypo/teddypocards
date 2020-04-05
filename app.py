@@ -7,7 +7,7 @@ import random
 
 @app.route('/')
 def hello():
-    return "Hello World"
+    return redirect(url_for('join_page'))
 
 @app.route('/action/<user_name>/<action_string>')
 def action(user_name, action_string):
@@ -93,6 +93,41 @@ def play_page(user_name):
     activity_log = state.get('activity_log', [])
     return render_template("play_page.html", players=players, graveyard=graveyard, deck_size = deck_size, user_name=user_name, activity_log=activity_log)
 
+@app.route('/join_page')
+def join_page():
+    return render_template("join_page.html")
+@app.route('/join', methods=["GET", "POST"])
+def join():
+    user_name = str(request.values['user_name'])
+    with open('/var/www/TeddyPoCards/state.json', "r") as statef:
+        state = json.load(statef)
+    players = state.get('players', [])
+    def user_exists():
+        for item in state.get('players', []):
+            if item['user_name'] == user_name:
+                return True
+        return False
+
+    if not user_exists():
+        players.append(dict(user_name = user_name, n_coins = 2, cards = []))
+        state['players'] = players
+        if len(state['deck']) > 0:
+            random.shuffle(state['deck'])
+            card = state['deck'].pop()
+            card['hidden'] = True
+            for player in state.get('players', []):
+                if player['user_name'] == user_name:
+                    player['cards'].append(card)
+        if len(state['deck']) > 0:
+            random.shuffle(state['deck'])
+            card = state['deck'].pop()
+            card['hidden'] = True
+            for player in state.get('players', []):
+                if player['user_name'] == user_name:
+                    player['cards'].append(card)
+        with open('/var/www/TeddyPoCards/state.json', "w") as statef:
+            json.dump(state, statef)
+    return redirect(url_for('play_page', user_name=user_name))
 
 
 if __name__ == "__main__":
