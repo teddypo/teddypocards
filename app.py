@@ -58,12 +58,15 @@ def action(user_name, action_string):
                         hand.append(card)
                 player['cards'] = hand
     if act_split[0] == 'claim':
-        idx = random.randint(0,len(state['deck']))
-        card = state['deck'].pop(idx)
-        card['hidden'] = True
-        for player in state.get('players', []):
-            if player['user_name'] == user_name:
-                player['cards'].append(card)
+        # idx = random.randint(0,len(state['deck']))
+        # card = state['deck'].pop(idx)
+        if len(state['deck']) > 0:
+            random.shuffle(state['deck'])
+            card = state['deck'].pop()
+            card['hidden'] = True
+            for player in state.get('players', []):
+                if player['user_name'] == user_name:
+                    player['cards'].append(card)
     if act_split[0] == 'reset':
         with open('/var/www/TeddyPoCards/state_base.json', "r") as statef:
             state = json.load(statef)
