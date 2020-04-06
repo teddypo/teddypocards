@@ -5,13 +5,15 @@ app = Flask(__name__)
 import json
 import random
 
+db_prefix = '/var/www/TeddyPoCards/'
+
 @app.route('/')
 def hello():
     return redirect(url_for('join_page'))
 
 @app.route('/action/<user_name>/<action_string>')
 def action(user_name, action_string):
-    with open('/var/www/TeddyPoCards/state.json', "r") as statef:
+    with open(db_prefix+'state.json', "r") as statef:
         state = json.load(statef)
     state['activity_log'] = state.get('activity_log', [])
     act_split = action_string.split('_')
@@ -68,7 +70,7 @@ def action(user_name, action_string):
                 if player['user_name'] == user_name:
                     player['cards'].append(card)
     if act_split[0] == 'reset':
-        with open('/var/www/TeddyPoCards/state_base.json', "r") as statef:
+        with open(db_prefix+'state_base.json', "r") as statef:
             state = json.load(statef)
         for item in range(int(act_split[1])):
             state['players'].append(dict(user_name = "player" + str(item+1), n_coins = 2, cards = []))
@@ -76,7 +78,7 @@ def action(user_name, action_string):
     print(state)
     state['activity_log'].append(f"{user_name} did {action_string}")
     print (state['players'])
-    with open('/var/www/TeddyPoCards/state.json', "w") as statef:
+    with open(db_prefix+'state.json', "w") as statef:
         json.dump(state, statef)
     return redirect(url_for('play_page', user_name=user_name))
 
@@ -84,7 +86,7 @@ def action(user_name, action_string):
 def play_page(user_name):
     n_coins = 0
     players = []
-    with open('/var/www/TeddyPoCards/state.json') as statef:
+    with open(db_prefix+'state.json') as statef:
         state = json.load(statef)
     players = state.get('players', [])
     graveyard = state.get('graveyard', [])
@@ -99,7 +101,7 @@ def join_page():
 @app.route('/join', methods=["GET", "POST"])
 def join():
     user_name = str(request.values['user_name'])
-    with open('/var/www/TeddyPoCards/state.json', "r") as statef:
+    with open(db_prefix+'state.json', "r") as statef:
         state = json.load(statef)
     players = state.get('players', [])
     def user_exists():
@@ -125,12 +127,16 @@ def join():
             for player in state.get('players', []):
                 if player['user_name'] == user_name:
                     player['cards'].append(card)
-        with open('/var/www/TeddyPoCards/state.json', "w") as statef:
+        with open(db_prefix+'state.json', "w") as statef:
             json.dump(state, statef)
     return redirect(url_for('play_page', user_name=user_name))
 
+def main():
+    global db_prefix
+    db_prefix = ''
+    app.run(host='0.0.0.0')
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0')
+    main()
 
 
