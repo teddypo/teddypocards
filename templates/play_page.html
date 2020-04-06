@@ -9,6 +9,7 @@
 	</script>
 {% endblock %}
 {% block bodycontent %}
+	<h1>room_name: {{room_name}} </h1>
 	<h1>user_name: {{user_name}} </h1>
 	{% for player in players %}
 	<h2>{{player.user_name}}'s cards</h2>
