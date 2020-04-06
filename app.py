@@ -201,8 +201,6 @@ def join():
             for player in game_data.get('players', []):
                 if player['user_name'] == user_name:
                     player['cards'].append(card)
-        state["rooms"]["room_name"] = room
-        print(state)
         with open(db_prefix+'state.json', "w") as statef:
             json.dump(state, statef)
     return redirect(url_for('play_page', user_name=user_name, room_name=room_name))
