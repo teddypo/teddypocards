@@ -9,7 +9,8 @@ db_prefix = '/var/www/TeddyPoCards/'
 
 @app.route('/')
 def hello():
-    return redirect(url_for('join_page'))
+    return render_template('landing_page.html')
+    #return redirect(url_for('join_page'))
 
 @app.route('/action/<user_name>/<action_string>')
 def action(user_name, action_string):
