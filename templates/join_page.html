@@ -1,11 +1,16 @@
 {% extends 'base.html' %}
 {% block bodycontent %}
 <form action="{{url_for('join')}}" method="post">
+  <div class="form-group">
 	<label>Username:</label>
 	<input type="text" name="user_name"/>
+  </div>
+  <div class="form-group">
 	<label>Room Name:</label>
 	<input type="text" name="private_room_name"/>
 	<input type="submit" value="Join" name="private_join"/>
+  </div>
+  <div class="form-group">
 	<label>Public:</label>
 	<select name="public_room_name">
 		<option></option>
@@ -14,5 +19,6 @@
 		{% endfor %}
 	</select>
 	<input type="submit" value="Join" name="public_join"/>
+  </div>
 </form>
 {% endblock %}
