@@ -165,8 +165,10 @@ def join():
     user_name = str(escape(request.values['user_name']))
     if 'private_join' in request.values:
         room_name = str(escape(request.values['private_room_name']))
-    else:
+    elif 'public_join' in request.values:
         room_name = str(escape(request.values['public_room_name']))
+    else:
+        room_name = str(escape(request.values['room_name']))
     with open(db_prefix+'state.json', "r") as statef:
         state = json.load(statef)
     room = state.get('rooms', dict(room_name=None)).get(room_name, None)

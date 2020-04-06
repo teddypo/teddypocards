@@ -57,7 +57,7 @@
 		<li>{{activity}} </li>
 		{% endfor %}
 	</ul>
-	<a href={{url_for("action", user_name=user_name, action_string="reset_0", room_name=room_name)}}>Reset Game To Empty</a>
+	<a href={{url_for("action", user_name=user_name, action_string="reset_0", room_name=room_name)}}>Reset Game</a>
 	<h1></h1>
 	<a href={{url_for("join", user_name=user_name, room_name=room_name)}}>Rejoin</a>
 {% endblock %}
