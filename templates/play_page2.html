@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+{% block bodycontent %}
+<div class="container">
+<div class="jumbotron">
+	<div class="row">
+	<div class="col-md-8 call-sm-12">
+	<table class="table">
+		<thead>
+			<th scope="col">user_name</th>
+			<th scope="col"># Coins</th>
+			<th scope="col">Card 1</th>
+			<th scope="col">Card 2</th>
+		</thead>
+		<tbody>
+			{% for player in players %}
+			{% if player.user_name == turn %}
+			<tr class="table-primary">
+			{% elif player.user_name == user_name %}
+			<tr class="table-success">
+			{% else %}
+			<tr>
+			{% endif %}
+				<td scope="col">{{player.user_name}}</td>
+				<td scope="col">{{player.n_coins}}</td>
+				{% for i in range(2) %}
+				{% if player.cards|length < (i+1) %}
+				<td scope="col"></td>
+				{% elif player.cards[i].hidden and player.user_name != user_name%}
+				<td scope="col">Hidden</td>
+				{% elif not player.cards[i].hidden %}
+				<td scope="col"><b>{{player.cards[i].name}}</b></td>
+				{% else %}
+				<td scope="col">{{player.cards[i].name}}</td>
+				{% endif %}
+				{% endfor %}
+			</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+	</div>
+	<div class="col-md-4">
+	  <ul class="list-group">
+		<li class="list-group-item">GraveYard</li>
+		{% for card in graveyard %}
+		<li class="list-group-item">{{card.name}}</li>
+		{% endfor %}
+	  </ul>
+	  <ul class="list-group">
+		  <li class="list-group-item">Deck: {{deck_size}} cards</li>
+	  </ul>
+	</div>
+	</div>
+
+{% if user_name != turn %}
+{% set dis_str = "disabled" %}
+{% else %}
+{% set dis_str = "" %}
+{% endif %}
+<button type="button" class="btn btn-dark" {{dis_str}}>Income</button>
+<button type="button" class="btn btn-dark" {{dis_str}}>Foreign Aid</button>
+<button type="button" class="btn btn-dark" {{dis_str}}>Tax</button>
+<div class="dropdown button-row">
+  <button type="button" class="btn btn-dark dropdown-toggle" type="button" id="stealDrop" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" {{dis_str}}>Steal</button>
+  <div class="dropdown-menu" aria-labelledby="stealDrop">
+	  {% for player in players %}
+	  <a class="dropdown-item" href="#">{{player.user_name}}</a>
+	  {% endfor %}
+  </div>
+</div>
+<div class="dropdown button-row">
+  <button type="button" class="btn btn-dark dropdown-toggle" type="button" id="assassinateDrop" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" {{dis_str}}>Assassinate</button>
+  <div class="dropdown-menu" aria-labelledby="assassinateDrop">
+	  {% for player in players %}
+	  <a class="dropdown-item" href="#">{{player.user_name}}</a>
+	  {% endfor %}
+  </div>
+</div>
+<div class="dropdown button-row" id="exchangeDropWrap">
+  <button type="button" class="btn btn-dark dropdown-toggle" type="button" id="exchangeDrop" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" {{dis_str}}>Exchange</button>
+  <div class="dropdown-menu" aria-labelledby="exchangeDrop" id="exchangeDropContent">
+	  <!--<a class="dropdown-item" href="#" id="exchangeCard1">Discard RandCard</a>
+	  <a class="dropdown-item" href="#" id="exchangeCard2">Discard RandCard</a>
+	  <a class="dropdown-item" href="#" id="exchangeCard3">Discard RandCard</a>
+	  <a class="dropdown-item" href="#" id="exchangeCard4">Discard RandCard</a>-->
+  </div>
+</div>
+<div class="dropdown button-row">
+  <button type="button" class="btn btn-dark dropdown-toggle" type="button" id="coupDrop" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" {{dis_str}}>Coup</button>
+  <div class="dropdown-menu" aria-labelledby="coupDrop">
+	  {% for player in players %}
+	  <a class="dropdown-item" href="#">{{player.user_name}}</a>
+	  {% endfor %}
+  </div>
+</div>
+
+<nav class="navbar navbar-light bg-light">
+	<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#expandedHistory" aria-controls="expandedHistory" aria-expanded="false"aria-label="Toggle longer history">
+		<span class="navbar-toggler-icon"></span>
+	</button>
+	<a class="navbar-brand" href="#">{{activity_log[activity_log|length - 1]}}</a>
+	<form class="form-inline">
+		<button class="btn btn-outline-danger" type="button">Challange</button>
+		<button class="btn btn-outline-dark" type="button">Block</button>
+	</form>
+</nav>
+<div class="collapse" id="expandedHistory">
+  <ul class="list-group">
+    {% for item in activity_log|reverse %}
+    {% if loop.index0 != 0 %}
+    <li class="list-group-item">{{item}}</li>
+    {% endif %}
+    {% endfor %}
+  </ul>
+</div>
+
+
+</div>
+</div>
+{% endblock %}

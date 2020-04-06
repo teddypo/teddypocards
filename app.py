@@ -104,6 +104,21 @@ def play_page(user_name, room_name):
     activity_log = game_data.get('activity_log', [])
     return render_template("play_page.html", players=players, graveyard=graveyard, deck_size = deck_size, user_name=user_name, activity_log=activity_log, room_name=room_name)
 
+@app.route('/play_page2/<user_name>/<room_name>')
+def play_page2(user_name, room_name):
+    n_coins = 0
+    players = []
+    with open(db_prefix+'state.json') as statef:
+        state = json.load(statef)
+    game_data = state.get('rooms', dict()).get(room_name, dict()).get('game_data', dict())
+    turn = game_data.get('turn')
+    players = game_data.get('players', [])
+    graveyard = game_data.get('graveyard', [])
+    deck = game_data.get('deck', [])
+    deck_size = len(deck)
+    activity_log = game_data.get('activity_log', [])
+    return render_template("play_page2.html", players=players, graveyard=graveyard, deck_size = deck_size, user_name=user_name, activity_log=activity_log, room_name=room_name, turn=turn)
+
 @app.route('/join_page')
 def join_page():
     with open(db_prefix+'state.json', "r") as statef:
