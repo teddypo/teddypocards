@@ -1,1 +1,188 @@
-{"players": [], "deck": [{"hidden": true, "name": "Assassin", "id": 1}, {"hidden": true, "name": "Assassin", "id": 2}, {"hidden": true, "name": "Assassin", "id": 3}, {"hidden": true, "name": "Cantessa", "id": 4}, {"hidden": true, "name": "Cantessa", "id": 5}, {"hidden": true, "name": "Cantessa", "id": 6}, {"hidden": true, "name": "Ambassador", "id": 7}, {"hidden": true, "name": "Ambassador", "id": 8}, {"hidden": true, "name": "Ambassador", "id": 9}, {"hidden": true, "name": "Captain", "id": 10}, {"hidden": true, "name": "Captain", "id": 11}, {"hidden": true, "name": "Captain", "id": 12}, {"hidden": true, "name": "Duke", "id": 13}, {"hidden": true, "name": "Duke", "id": 14}, {"hidden": true, "name": "Duke", "id": 15}], "graveyard": [], "activity_log": ["steeve did reset_0"]}
+{
+  "rooms": {
+    "example_game": {
+      "room_name": "example_game",
+      "game_master": "example_user",
+      "is_private": "on",
+      "game_name": "Overthrown",
+      "game_data": {
+        "players": [
+          {
+            "user_name": "example_user",
+            "n_coins": 2,
+            "cards": [
+              {
+                "hidden": true,
+                "name": "Assassin",
+                "id": 3
+              },
+              {
+                "hidden": true,
+                "name": "Assassin",
+                "id": 1
+              }
+            ]
+          }
+        ],
+        "deck": [
+          {
+            "hidden": true,
+            "name": "Cantessa",
+            "id": 6
+          },
+          {
+            "hidden": true,
+            "name": "Captain",
+            "id": 10
+          },
+          {
+            "hidden": true,
+            "name": "Cantessa",
+            "id": 4
+          },
+          {
+            "hidden": true,
+            "name": "Duke",
+            "id": 13
+          },
+          {
+            "hidden": true,
+            "name": "Duke",
+            "id": 15
+          },
+          {
+            "hidden": true,
+            "name": "Ambassador",
+            "id": 8
+          },
+          {
+            "hidden": true,
+            "name": "Assassin",
+            "id": 2
+          },
+          {
+            "hidden": true,
+            "name": "Duke",
+            "id": 14
+          },
+          {
+            "hidden": true,
+            "name": "Ambassador",
+            "id": 7
+          },
+          {
+            "hidden": true,
+            "name": "Captain",
+            "id": 12
+          },
+          {
+            "hidden": true,
+            "name": "Ambassador",
+            "id": 9
+          },
+          {
+            "hidden": true,
+            "name": "Cantessa",
+            "id": 5
+          },
+          {
+            "hidden": true,
+            "name": "Captain",
+            "id": 11
+          }
+        ],
+        "graveyard": [],
+        "activity_log": []
+      },
+      "game_init": {
+        "players": [
+          {
+            "user_name": "example_user",
+            "n_coins": 2,
+            "cards": [
+              {
+                "hidden": true,
+                "name": "Assassin",
+                "id": 3
+              },
+              {
+                "hidden": true,
+                "name": "Assassin",
+                "id": 1
+              }
+            ]
+          }
+        ],
+        "deck": [
+          {
+            "hidden": true,
+            "name": "Cantessa",
+            "id": 6
+          },
+          {
+            "hidden": true,
+            "name": "Captain",
+            "id": 10
+          },
+          {
+            "hidden": true,
+            "name": "Cantessa",
+            "id": 4
+          },
+          {
+            "hidden": true,
+            "name": "Duke",
+            "id": 13
+          },
+          {
+            "hidden": true,
+            "name": "Duke",
+            "id": 15
+          },
+          {
+            "hidden": true,
+            "name": "Ambassador",
+            "id": 8
+          },
+          {
+            "hidden": true,
+            "name": "Assassin",
+            "id": 2
+          },
+          {
+            "hidden": true,
+            "name": "Duke",
+            "id": 14
+          },
+          {
+            "hidden": true,
+            "name": "Ambassador",
+            "id": 7
+          },
+          {
+            "hidden": true,
+            "name": "Captain",
+            "id": 12
+          },
+          {
+            "hidden": true,
+            "name": "Ambassador",
+            "id": 9
+          },
+          {
+            "hidden": true,
+            "name": "Cantessa",
+            "id": 5
+          },
+          {
+            "hidden": true,
+            "name": "Captain",
+            "id": 11
+          }
+        ],
+        "graveyard": [],
+        "activity_log": []
+      }
+    }
+  }
+}

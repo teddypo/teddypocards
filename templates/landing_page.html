@@ -4,8 +4,8 @@
 {% block bodycontent %}
 <div class="container">
 <div class="jumbotron">
-	<a href="/join_page" class="btn btn-light btn-block">Join Game</a>
-	<a href="#" class="btn btn-light btn-block">Create Game</a>
+	<a href="{{url_for('join_page')}}" class="btn btn-light btn-block">Join Game</a>
+	<a href="{{url_for('create_page')}}" class="btn btn-light btn-block">Create Game</a>
 </div>
 </div>
 {% endblock %}

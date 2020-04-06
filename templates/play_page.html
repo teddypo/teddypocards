@@ -21,10 +21,10 @@
 				{% if not card.hidden %}
 				<b>Revealed!</b>
 				{% endif %}
-			<a href={{url_for("hello")}}action/{{user_name}}/reveal_{{card.id}}>Reveal</a>
-			<a href={{url_for("hello")}}action/{{user_name}}/hide_{{card.id}}>Hide</a>
-			<a href={{url_for("hello")}}action/{{user_name}}/grave_{{card.id}}>Grave</a>
-			<a href={{url_for("hello")}}action/{{user_name}}/deck_{{card.id}}>Deck</a>
+			<a href={{url_for("action", user_name=user_name, action_string="reveal_"+card.id|string, room_name=room_name)}}>Reveal</a>
+			<a href={{url_for("action", user_name=user_name, action_string="hide_"+card.id|string, room_name=room_name)}}>Hide</a>
+			<a href={{url_for("action", user_name=user_name, action_string="grave_"+card.id|string, room_name=room_name)}}>Grave</a>
+			<a href={{url_for("action", user_name=user_name, action_string="deck_"+card.id|string, room_name=room_name)}}>Deck</a>
 			</p>
 			{% else %}
 			{% if card.hidden %}
@@ -38,8 +38,8 @@
 	</ul>
 	<h2>
 		{{player.user_name}}'s Coins: {{player.n_coins}}
-		<a href={{url_for("hello")}}action/{{user_name}}/increase_{{player.user_name}}>+</a>
-		<a href={{url_for("hello")}}action/{{user_name}}/decrease_{{player.user_name}}>-</a>
+		<a href={{url_for("action", user_name=user_name, action_string="increase_"+player.user_name, room_name=room_name)}}>+</a>
+		<a href={{url_for("action", user_name=user_name, action_string="decrease_"+player.user_name, room_name=room_name)}}>-</a>
 	</h2>
 	{% endfor %}
 	<h1>The Grave Yard</h1>
@@ -50,20 +50,14 @@
 	</ul>
 	<h1>The Deck</h1>
 	<h2>Number Of Cards {{deck_size}}</h2>
-	<a href={{url_for("hello")}}action/{{user_name}}/claim>ClaimCard</a>
+	<a href={{url_for("action", user_name=user_name, action_string="claim", room_name=room_name)}}>ClaimCard</a>
 	<h1>ActivityLog</h1>
 	<ul>
 		{% for activity in activity_log|reverse%}
 		<li>{{activity}} </li>
 		{% endfor %}
 	</ul>
-	<a href={{url_for("hello")}}action/{{user_name}}/reset_0>Reset 0 Player Game</a>
-	<a href={{url_for("hello")}}action/{{user_name}}/reset_1>Reset 1 Player Game</a>
-	<a href={{url_for("hello")}}action/{{user_name}}/reset_2>Reset 2 Player Game</a>
-	<a href={{url_for("hello")}}action/{{user_name}}/reset_3>Reset 3 Player Game</a>
-	<a href={{url_for("hello")}}action/{{user_name}}/reset_4>Reset 4 Player Game</a>
-	<a href={{url_for("hello")}}action/{{user_name}}/reset_5>Reset 5 Player Game</a>
-	<a href={{url_for("hello")}}action/{{user_name}}/reset_6>Reset 6 Player Game</a>
+	<a href={{url_for("action", user_name=user_name, action_string="reset_0", room_name=room_name)}}>Reset Game To Empty</a>
 	<h1></h1>
-	<a href={{url_for("join", user_name=user_name)}}>Rejoin</a>
+	<a href={{url_for("join", user_name=user_name, room_name=room_name)}}>Rejoin</a>
 {% endblock %}

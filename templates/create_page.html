@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block bodycontent %}
+<h1>Create Game Room</h1>
+<form action="{{url_for('create')}}" method="post" id="create_form">
+  <div class="form-group">
+	<label for="user_name">Username:</label>
+	<input id="user_name" type="text" name="user_name"/>
+  </div>
+  <div class="form-group">
+	<label for="room_name">Room Name:</label>
+	<input id="room_name" type="text" name="room_name"/>
+  </div>
+  <div class="form-group">
+	<input id="is_private" name="is_private" type="checkbox"/>
+	<label for="is_private">Private (dont list publicly)</label>
+  </div>
+  <div class="form-group">
+	<label>Game</label>
+	<select class="form-control" id="game_chooser" name="game_name">
+		{% for item in game_names %}
+		<option>{{ item }}</option>	
+		{% endfor %}
+	</select>
+  </div>
+  <div class="form-group">
+	  <button type="submit" class="btn btn-light" id="create_submit">Create</button>
+  </div>
+</form>
+{% endblock %}
