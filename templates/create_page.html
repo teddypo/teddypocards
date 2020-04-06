@@ -1,5 +1,7 @@
 {% extends 'base.html' %}
 {% block bodycontent %}
+<div class="container">
+<div class="jumbotron">
 <h1>Create Game Room</h1>
 <form action="{{url_for('create')}}" method="post" id="create_form">
   <div class="form-group">
@@ -26,4 +28,6 @@
 	  <button type="submit" class="btn btn-light" id="create_submit">Create</button>
   </div>
 </form>
+</div>
+</div>
 {% endblock %}
