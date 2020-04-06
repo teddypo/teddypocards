@@ -5,6 +5,7 @@ app = Flask(__name__)
 import json
 import random
 import copy
+import uuid
 
 db_prefix = '/var/www/TeddyPoCards/'
 
@@ -121,7 +122,15 @@ def create_page():
 @app.route('/create', methods=["GET", "POST"])
 def create():
     user_name = escape(request.form.get('user_name', ''))
+    user_name = user_name.replace(' ', '')
+    if len(user_name) == 0:
+        # TODO improve - prevent collisions with db checking
+        user_name = 'player'+str(uuid.uuid4().hex)[0:8]
     room_name = escape(request.form.get('room_name', ''))
+    room_name = room_name.replace(' ', '')
+    if len(room_name) == 0:
+        # TODO improve - prevent collisions with db checking
+        room_name = 'room'+str(uuid.uuid4().hex)[0:8]
     is_private = escape(request.form.get('is_private', ''))
     game_name = escape(request.form.get('game_name', ''))
     if game_name == "Overthrown":
@@ -164,6 +173,10 @@ def create():
 @app.route('/join', methods=["GET", "POST"])
 def join():
     user_name = str(escape(request.values['user_name']))
+    user_name = user_name.replace(' ', '')
+    if len(user_name) == 0:
+        # TODO improve - prevent collisions with db checking
+        user_name = 'player'+str(uuid.uuid4().hex)[0:8]
     if 'private_join' in request.values:
         room_name = str(escape(request.values['private_room_name']))
     elif 'public_join' in request.values:
