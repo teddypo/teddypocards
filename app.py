@@ -127,6 +127,7 @@ def create():
     if game_name == "Overthrown":
         with open(db_prefix+'state_base.json', "r") as statef:
             game_data = json.load(statef)
+        game_init = copy.deepcopy(game_data)
         players=game_data.get('players', [])
         players.append(dict(user_name = user_name, n_coins = 2, cards = []))
         game_data['players'] = players
@@ -151,7 +152,7 @@ def create():
                 is_private = is_private,
                 game_name = game_name,
                 game_data = game_data,
-                game_init = copy.deepcopy(game_data))
+                game_init = game_init)
     with open(db_prefix+'state.json', "r") as statef:
         state = json.load(statef)
     rooms = state.get('rooms', dict())
