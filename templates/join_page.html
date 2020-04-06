@@ -4,7 +4,15 @@
 	<label>Username:</label>
 	<input type="text" name="user_name"/>
 	<label>Room Name:</label>
-	<input type="text" name="room_name"/>
-	<input type="submit" value="Join"/>
+	<input type="text" name="private_room_name"/>
+	<input type="submit" value="Join" name="private_join"/>
+	<label>Public:</label>
+	<select name="public_room_name">
+		<option></option>
+		{% for item in public_rooms %}
+		<option>{{item}}</option>
+		{% endfor %}
+	</select>
+	<input type="submit" value="Join" name="public_join"/>
 </form>
 {% endblock %}

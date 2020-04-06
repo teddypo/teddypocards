@@ -105,7 +105,15 @@ def play_page(user_name, room_name):
 
 @app.route('/join_page')
 def join_page():
-    return render_template("join_page.html")
+    with open(db_prefix+'state.json', "r") as statef:
+        state = json.load(statef)
+    public_rooms = []
+    rooms = state.get('rooms', [])
+    for item in rooms:
+        print(rooms[item].get('is_private'))
+        if len(rooms[item].get('is_private', "on")) == 0:
+            public_rooms.append(item)
+    return render_template("join_page.html", public_rooms=public_rooms)
 @app.route('/create_page')
 def create_page():
     game_names = ["Overthrown"]
@@ -155,7 +163,10 @@ def create():
 @app.route('/join', methods=["GET", "POST"])
 def join():
     user_name = str(escape(request.values['user_name']))
-    room_name = str(escape(request.values['room_name']))
+    if 'private_join' in request.values:
+        room_name = str(escape(request.values['private_room_name']))
+    else:
+        room_name = str(escape(request.values['public_room_name']))
     with open(db_prefix+'state.json', "r") as statef:
         state = json.load(statef)
     room = state.get('rooms', dict(room_name=None)).get(room_name, None)
