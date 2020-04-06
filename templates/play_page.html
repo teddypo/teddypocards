@@ -1,19 +1,14 @@
-<!doctype html>
-<head>
-	<title>TeddyPoCards Play Page</title>
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+{% extends 'base.html' %}
+{% block headaddons %}
 	<script>
 		$(document).ready(function(){
 			setTimeout(function(){
-				console.log('hi')
 				location.reload();
 			}, 5000);
 		})
 	</script>
-	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
-</head>
-
-<body>
+{% endblock %}
+{% block bodycontent %}
 	<h1>user_name: {{user_name}} </h1>
 	{% for player in players %}
 	<h2>{{player.user_name}}'s cards</h2>
@@ -71,6 +66,4 @@
 	<a href={{url_for("hello")}}action/{{user_name}}/reset_6>Reset 6 Player Game</a>
 	<h1></h1>
 	<a href={{url_for("join", user_name=user_name)}}>Rejoin</a>
-</body>
-
-
+{% endblock %}
