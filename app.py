@@ -159,7 +159,7 @@ def create():
     state['rooms'] = rooms
     with open(db_prefix+'state.json', "w") as statef:
         json.dump(state, statef)
-    return (state)
+    return redirect(url_for('play_page', user_name=user_name, room_name=room_name))
 @app.route('/join', methods=["GET", "POST"])
 def join():
     user_name = str(escape(request.values['user_name']))
