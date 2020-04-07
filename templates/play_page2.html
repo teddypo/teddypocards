@@ -30,7 +30,7 @@
 				{% elif not player.cards[i].hidden %}
 				<td scope="col"><b>{{player.cards[i].name}}</b></td>
 				{% else %}
-				<td scope="col">{{player.cards[i].name}}</td>
+                <td scope="col" id="mycard{{loop.index0}}">{{player.cards[i].name}}</td>
 				{% endif %}
 				{% endfor %}
 			</tr>
@@ -98,7 +98,7 @@
 	</button>
 	<a class="navbar-brand" href="#" id="latest_activity">{{activity_log[activity_log|length - 1]}}</a>
 	<form class="form-inline">
-		<button class="btn btn-outline-danger" type="button">Challange</button>
+		<button class="btn btn-outline-danger" type="button" id="challenge_button">Challenge</button>
 		<button class="btn btn-outline-dark" type="button" id="block_button">Block</button>
 	</form>
 </nav>
@@ -126,8 +126,8 @@
       <div class="modal-footer">
         <button type="button" class="btn btn-danger" data-dismiss="modal">Challange</button>
         <button type="button" class="btn btn-dark" data-dismiss="modal">Block</button>
-        <button type="button" class="btn btn-success" data-dismiss="modal">DiscardCard1</button>
-        <button type="button" class="btn btn-success" data-dismiss="modal">DiscardCard2</button>
+        <button type="button" class="btn btn-success" data-dismiss="modal" id="discard0">DiscardCard1</button>
+        <button type="button" class="btn btn-success" data-dismiss="modal" id="discard1">DiscardCard2</button>
       </div>
     </div>
   </div>

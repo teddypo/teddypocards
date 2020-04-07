@@ -55,6 +55,39 @@ $(document).ready(function(){
                 }
             });
 	});
+	$('#challenge_button').on('click', function(e){
+            $.ajax({
+                url: '/action/'+user_name+'/challenge/'+game_name,
+                data: 'desired_challenge='+$("#latest_activity").text(),
+                success: function(result){
+                    console.log(result)
+                    updateUIGameState(result.game_data)
+                }
+            });
+	});
+	$('#discard0').on('click', function(e){
+            $.ajax({
+                url: '/action/'+user_name+'/discard_0/'+game_name,
+                data: 'desired_challenge='+$("#latest_activity").text(),
+                success: function(result){
+                    console.log(result)
+                    updateUIGameState(result.game_data)
+                }
+            });
+	});
+	$('#discard1').on('click', function(e){
+            $.ajax({
+                url: '/action/'+user_name+'/discard_1/'+game_name,
+                data: 'desired_challenge='+$("#latest_activity").text(),
+                success: function(result){
+                    console.log(result)
+                    updateUIGameState(result.game_data)
+                }
+            });
+	});
+    if (penalize_me){
+        $("#discardCardModal").modal('show')
+    }
     var updateUIGameState = function(game_data){
         var players = game_data.players
         var is_my_turn = false
@@ -72,6 +105,15 @@ $(document).ready(function(){
                 is_my_turn = true
             }
             $('#coins'+i).text(players[i].n_coins)
+            for (var j = 0; j < 2; j++){
+               if (j >= players[i].cards.length){
+                   $('#mycard'+j).empty()
+               }else{
+                   $('#mycard'+j).text(players[i].cards[j].name)
+               }
+                       
+
+            }
         }
         if(is_my_turn){
             $('.turn_button').removeAttr('disabled')
@@ -86,6 +128,9 @@ $(document).ready(function(){
             }else{
                 $('#act_list').append('<li class="list-group-item">'+activity_log[i]+'</li>')
             }
+        }
+        if("penalize" in game_data && game_data.penalize == user_name){
+            $("#discardCardModal").modal('show')
         }
     }
 });

@@ -109,9 +109,50 @@ def action(user_name, action_string, room_name):
         is_ajax = True
         if request.values['desired_block'] == game_data["activity_log"][-1]:
             activity_log = copy.deepcopy(game_data["activity_log"])
+            bs = copy.deepcopy(game_data)
             game_data = copy.deepcopy(game_data['block_state'])
             game_data["activity_log"] = activity_log
+            game_data["block_state"] = bs
+            def is_duke(player_name):
+                for item in game_data["players"]:
+                    if item["user_name"] == player_name:
+                        for card in item["cards"]:
+                            if card["name"] == "Duke":
+                                return True
+                return False
+            if ("foreignaid" in game_data["activity_log"][0] and is_duke(user_name)):
+                game_data["claim_legit"] = True
+                game_data["claim_maker"] = user_name
+            else:
+                game_data["claim_legit"] = False
+                game_data["claim_maker"] = user_name
             room["game_data"] = game_data
+    if act_split[0] == 'challenge':
+        is_ajax = True
+        if request.values['desired_challenge'] == game_data["activity_log"][-1]:
+            if game_data["claim_legit"] == False:
+                claim_maker = game_data["claim_maker"]
+                activity_log = copy.deepcopy(game_data["activity_log"])
+                game_data = copy.deepcopy(game_data['block_state'])
+                game_data["activity_log"] = activity_log
+                game_data["penalize"] = claim_maker
+                room["game_data"] = game_data
+            else:
+                game_data["penalize"] = user_name
+    if act_split[0] == "discard":
+        is_ajax = True
+        for player in game_data.get('players', []):
+            if player['user_name'] == user_name:
+                hand = []
+                for i, card in enumerate(player.get('cards', [])):
+                    if str(i) == act_split[1]:
+                        game_data['graveyard'].append(card)
+                    else:
+                        hand.append(card)
+                player['cards'] = hand
+                game_data["penalize"] = ''
+
+
 
 
     game_data['activity_log'].append(f"{user_name} did {action_string}")
@@ -153,8 +194,9 @@ def play_page2(user_name, room_name):
     graveyard = game_data.get('graveyard', [])
     deck = game_data.get('deck', [])
     deck_size = len(deck)
+    penalize = game_data.get('penalize', '')
     activity_log = game_data.get('activity_log', [])
-    return render_template("play_page2.html", players=players, graveyard=graveyard, deck_size = deck_size, user_name=user_name, activity_log=activity_log, room_name=room_name, turn=turn, whose_turn=whose_turn)
+    return render_template("play_page2.html", players=players, graveyard=graveyard, deck_size = deck_size, user_name=user_name, activity_log=activity_log, room_name=room_name, turn=turn, whose_turn=whose_turn, penalize=penalize)
 
 @app.route('/join_page')
 def join_page():
