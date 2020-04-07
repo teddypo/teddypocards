@@ -171,6 +171,8 @@ def create():
                     player['cards'].append(card)
     else:
         game_data = dict()
+    if "turn" not in game_data and len(game_data.get('players', [])) >= 1:
+        game_data["turn"] = game_data["players"][0]['user_name']
     room = dict(room_name = room_name,
                 game_master = user_name,
                 is_private = is_private,
@@ -230,8 +232,11 @@ def join():
             for player in game_data.get('players', []):
                 if player['user_name'] == user_name:
                     player['cards'].append(card)
-        with open(db_prefix+'state.json', "w") as statef:
-            json.dump(state, statef)
+    if "turn" not in game_data and len(game_data.get('players', [])) >= 1:
+        game_data["turn"] = game_data["players"][0]['user_name']
+    with open(db_prefix+'state.json', "w") as statef:
+        print('c')
+        json.dump(state, statef)
     return redirect(url_for('play_page', user_name=user_name, room_name=room_name))
 
 def main():
