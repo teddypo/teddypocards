@@ -94,6 +94,25 @@ def action(user_name, action_string, room_name):
                 game_data['turn'] += 1
                 if game_data['turn'] >= len(game_data["players"]):
                     game_data['turn'] = 0
+    if act_split[0] == 'takeforeignaid':
+        is_ajax = True
+        game_data = room["game_data"]
+        for player in game_data.get("players", []):
+            if player.get('user_name', '') == user_name:
+                game_data['turn'] += 1
+                if game_data['turn'] >= len(game_data["players"]):
+                    game_data['turn'] = 0
+                game_data['block_state'] = dict()
+                game_data['block_state'] = copy.deepcopy(game_data)
+                player['n_coins'] += 2
+    if act_split[0] == 'block':
+        is_ajax = True
+        if request.values['desired_block'] == game_data["activity_log"][-1]:
+            activity_log = copy.deepcopy(game_data["activity_log"])
+            game_data = copy.deepcopy(game_data['block_state'])
+            game_data["activity_log"] = activity_log
+            room["game_data"] = game_data
+
 
     game_data['activity_log'].append(f"{user_name} did {action_string}")
     with open(db_prefix+'state.json', "w") as statef:

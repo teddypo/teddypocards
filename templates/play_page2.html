@@ -56,7 +56,7 @@
 {% set dis_str = "" %}
 {% endif %}
 <button type="button" class="btn btn-dark turn_button" id="takeincome" {{dis_str}}>Income</button>
-<button type="button" class="btn btn-dark turn_button" {{dis_str}}>Foreign Aid</button>
+<button type="button" class="btn btn-dark turn_button" id="takeforeignaid" {{dis_str}}>Foreign Aid</button>
 <button type="button" class="btn btn-dark turn_button" {{dis_str}}>Tax</button>
 <div class="dropdown button-row">
   <button type="button" class="btn btn-dark dropdown-toggle turn_button" type="button" id="stealDrop" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" {{dis_str}}>Steal</button>
@@ -99,7 +99,7 @@
 	<a class="navbar-brand" href="#" id="latest_activity">{{activity_log[activity_log|length - 1]}}</a>
 	<form class="form-inline">
 		<button class="btn btn-outline-danger" type="button">Challange</button>
-		<button class="btn btn-outline-dark" type="button">Block</button>
+		<button class="btn btn-outline-dark" type="button" id="block_button">Block</button>
 	</form>
 </nav>
 <div class="collapse" id="expandedHistory">

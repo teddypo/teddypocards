@@ -26,10 +26,29 @@ $(document).ready(function(){
 		}
 	});
 	$('#takeincome').on('click', function(e){
-            console.log('click')
             $.ajax({
                 url: '/action/'+user_name+'/takeincome/'+game_name,
                 data: '{}',
+                success: function(result){
+                    console.log(result)
+                    updateUIGameState(result.game_data)
+                }
+            });
+	});
+	$('#takeforeignaid').on('click', function(e){
+            $.ajax({
+                url: '/action/'+user_name+'/takeforeignaid/'+game_name,
+                data: '{}',
+                success: function(result){
+                    console.log(result)
+                    updateUIGameState(result.game_data)
+                }
+            });
+	});
+	$('#block_button').on('click', function(e){
+            $.ajax({
+                url: '/action/'+user_name+'/block/'+game_name,
+                data: 'desired_block='+$("#latest_activity").text(),
                 success: function(result){
                     console.log(result)
                     updateUIGameState(result.game_data)
