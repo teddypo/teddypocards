@@ -7,21 +7,21 @@
 	<table class="table">
 		<thead>
 			<th scope="col">user_name</th>
-			<th scope="col"># Coins</th>
+			<th scope="col">Coins</th>
 			<th scope="col">Card 1</th>
 			<th scope="col">Card 2</th>
 		</thead>
 		<tbody>
 			{% for player in players %}
-			{% if player.user_name == turn %}
-			<tr class="table-primary">
+			{% if loop.index0 == turn %}
+            <tr class="table-primary" id="user_row{{loop.index0}}">
 			{% elif player.user_name == user_name %}
-			<tr class="table-success">
+            <tr class="table-success" id="user_row{{loop.index0}}">
 			{% else %}
-			<tr>
+            <tr id="user_row{{loop.index0}}">
 			{% endif %}
 				<td scope="col">{{player.user_name}}</td>
-				<td scope="col">{{player.n_coins}}</td>
+                <td scope="col" id="coins{{loop.index0}}">{{player.n_coins}}</td>
 				{% for i in range(2) %}
 				{% if player.cards|length < (i+1) %}
 				<td scope="col"></td>
@@ -50,17 +50,16 @@
 	  </ul>
 	</div>
 	</div>
-
-{% if user_name != turn %}
+{% if user_name != whose_turn %}
 {% set dis_str = "disabled" %}
 {% else %}
 {% set dis_str = "" %}
 {% endif %}
-<button type="button" class="btn btn-dark" {{dis_str}}>Income</button>
-<button type="button" class="btn btn-dark" {{dis_str}}>Foreign Aid</button>
-<button type="button" class="btn btn-dark" {{dis_str}}>Tax</button>
+<button type="button" class="btn btn-dark turn_button" id="takeincome" {{dis_str}}>Income</button>
+<button type="button" class="btn btn-dark turn_button" {{dis_str}}>Foreign Aid</button>
+<button type="button" class="btn btn-dark turn_button" {{dis_str}}>Tax</button>
 <div class="dropdown button-row">
-  <button type="button" class="btn btn-dark dropdown-toggle" type="button" id="stealDrop" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" {{dis_str}}>Steal</button>
+  <button type="button" class="btn btn-dark dropdown-toggle turn_button" type="button" id="stealDrop" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" {{dis_str}}>Steal</button>
   <div class="dropdown-menu" aria-labelledby="stealDrop">
 	  {% for player in players %}
 	  <a class="dropdown-item" href="#">{{player.user_name}}</a>
@@ -68,7 +67,7 @@
   </div>
 </div>
 <div class="dropdown button-row">
-  <button type="button" class="btn btn-dark dropdown-toggle" type="button" id="assassinateDrop" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" {{dis_str}}>Assassinate</button>
+  <button type="button" class="btn btn-dark dropdown-toggle turn_button" type="button" id="assassinateDrop" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" {{dis_str}}>Assassinate</button>
   <div class="dropdown-menu" aria-labelledby="assassinateDrop">
 	  {% for player in players %}
 	  <a class="dropdown-item" href="#">{{player.user_name}}</a>
@@ -76,7 +75,7 @@
   </div>
 </div>
 <div class="dropdown button-row" id="exchangeDropWrap">
-  <button type="button" class="btn btn-dark dropdown-toggle" type="button" id="exchangeDrop" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" {{dis_str}}>Exchange</button>
+  <button type="button" class="btn btn-dark dropdown-toggle turn_button" type="button" id="exchangeDrop" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" {{dis_str}}>Exchange</button>
   <div class="dropdown-menu" aria-labelledby="exchangeDrop" id="exchangeDropContent">
 	  <!--<a class="dropdown-item" href="#" id="exchangeCard1">Discard RandCard</a>
 	  <a class="dropdown-item" href="#" id="exchangeCard2">Discard RandCard</a>
@@ -85,7 +84,7 @@
   </div>
 </div>
 <div class="dropdown button-row">
-  <button type="button" class="btn btn-dark dropdown-toggle" type="button" id="coupDrop" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" {{dis_str}}>Coup</button>
+  <button type="button" class="btn btn-dark dropdown-toggle turn_button" type="button" id="coupDrop" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" {{dis_str}}>Coup</button>
   <div class="dropdown-menu" aria-labelledby="coupDrop">
 	  {% for player in players %}
 	  <a class="dropdown-item" href="#">{{player.user_name}}</a>
@@ -97,14 +96,14 @@
 	<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#expandedHistory" aria-controls="expandedHistory" aria-expanded="false"aria-label="Toggle longer history">
 		<span class="navbar-toggler-icon"></span>
 	</button>
-	<a class="navbar-brand" href="#">{{activity_log[activity_log|length - 1]}}</a>
+	<a class="navbar-brand" href="#" id="latest_activity">{{activity_log[activity_log|length - 1]}}</a>
 	<form class="form-inline">
 		<button class="btn btn-outline-danger" type="button">Challange</button>
 		<button class="btn btn-outline-dark" type="button">Block</button>
 	</form>
 </nav>
 <div class="collapse" id="expandedHistory">
-  <ul class="list-group">
+  <ul class="list-group" id="act_list">
     {% for item in activity_log|reverse %}
     {% if loop.index0 != 0 %}
     <li class="list-group-item">{{item}}</li>

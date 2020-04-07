@@ -13,6 +13,10 @@
 <!-- Latest compiled JavaScript -->
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
 <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+<script type='text/javascript'>
+    var user_name = "{{user_name}}";
+    var game_name = "{{room_name}}";
+</script>
 <script src="{{url_for('static', filename='scripts.js')}}"></script>
 {% block headaddons %}{% endblock %}
 </head>

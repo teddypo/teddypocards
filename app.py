@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from flask import Flask, render_template, redirect, url_for, request, escape
+from flask import Flask, render_template, redirect, url_for, request, escape, jsonify
 app = Flask(__name__)
 import json
 import random
@@ -16,6 +16,7 @@ def hello():
 
 @app.route('/action/<user_name>/<action_string>/<room_name>')
 def action(user_name, action_string, room_name):
+    is_ajax = False
     with open(db_prefix+'state.json', "r") as statef:
         state = json.load(statef)
     room = state.get('rooms', dict(room_name=None)).get(room_name, None)
@@ -84,11 +85,24 @@ def action(user_name, action_string, room_name):
         #    game_data['players'].append(dict(user_name = "player" + str(item+1), n_coins = 2, cards = []))
         room["game_data"] = room["game_init"]
         room["game_init"] = copy.deepcopy(room["game_init"])
+    if act_split[0] == 'takeincome':
+        is_ajax = True
+        game_data = room["game_data"]
+        for player in game_data.get("players", []):
+            if player.get('user_name', '') == user_name:
+                player['n_coins'] += 1
+                game_data['turn'] += 1
+                if game_data['turn'] >= len(game_data["players"]):
+                    game_data['turn'] = 0
 
     game_data['activity_log'].append(f"{user_name} did {action_string}")
     with open(db_prefix+'state.json', "w") as statef:
         json.dump(state, statef)
-    return redirect(url_for('play_page', user_name=user_name, room_name=room_name))
+    if is_ajax:
+        # TODO sanitize state so we arent sending private hand info and deck info out to all players
+        return jsonify(dict(game_data=game_data))
+    else:
+        return redirect(url_for('play_page', user_name=user_name, room_name=room_name))
 
 @app.route('/play_page/<user_name>/<room_name>')
 def play_page(user_name, room_name):
@@ -113,11 +127,15 @@ def play_page2(user_name, room_name):
     game_data = state.get('rooms', dict()).get(room_name, dict()).get('game_data', dict())
     turn = game_data.get('turn')
     players = game_data.get('players', [])
+    whose_turn = ''
+    for i, item in enumerate(players):
+        if i == turn:
+            whose_turn = item.get('user_name', '')
     graveyard = game_data.get('graveyard', [])
     deck = game_data.get('deck', [])
     deck_size = len(deck)
     activity_log = game_data.get('activity_log', [])
-    return render_template("play_page2.html", players=players, graveyard=graveyard, deck_size = deck_size, user_name=user_name, activity_log=activity_log, room_name=room_name, turn=turn)
+    return render_template("play_page2.html", players=players, graveyard=graveyard, deck_size = deck_size, user_name=user_name, activity_log=activity_log, room_name=room_name, turn=turn, whose_turn=whose_turn)
 
 @app.route('/join_page')
 def join_page():
@@ -171,8 +189,8 @@ def create():
                     player['cards'].append(card)
     else:
         game_data = dict()
-    if "turn" not in game_data and len(game_data.get('players', [])) >= 1:
-        game_data["turn"] = game_data["players"][0]['user_name']
+    if "turn" not in game_data:
+        game_data["turn"] = 0
     room = dict(room_name = room_name,
                 game_master = user_name,
                 is_private = is_private,
@@ -232,8 +250,8 @@ def join():
             for player in game_data.get('players', []):
                 if player['user_name'] == user_name:
                     player['cards'].append(card)
-    if "turn" not in game_data and len(game_data.get('players', [])) >= 1:
-        game_data["turn"] = game_data["players"][0]['user_name']
+    if "turn" not in game_data:
+        game_data["turn"] = 0
     with open(db_prefix+'state.json', "w") as statef:
         print('c')
         json.dump(state, statef)
