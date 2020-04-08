@@ -1,13 +1,22 @@
 #!/usr/bin/env python3
 
 from flask import Flask, render_template, redirect, url_for, request, escape, jsonify
-app = Flask(__name__)
+app = Flask(__name__, instance_relative_config=True)
+app.config.from_pyfile('config.py')
 import json
 import random
 import copy
 import uuid
+import pymongo
 
 db_prefix = '/var/www/TeddyPoCards/'
+
+@app.route('/mon')
+def mongo():
+    myclient = pymongo.MongoClient(app.config["MONGOSTRING"])
+    mydb = myclient["mydatabase"]
+    print(myclient.list_database_names())
+    return jsonify(dict(hi=1))
 
 @app.route('/')
 def hello():
