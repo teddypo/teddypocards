@@ -14,8 +14,106 @@ db_prefix = '/var/www/TeddyPoCards/'
 @app.route('/mon')
 def mongo():
     myclient = pymongo.MongoClient(app.config["MONGOSTRING"])
-    mydb = myclient["mydatabase"]
-    print(myclient.list_database_names())
+    mydb = myclient["dev_db"]
+    rooms = mydb["room"]
+    rooms.drop()
+
+    def create_room(room_name, game_master, is_private=False, game_name=''):
+        if rooms.find({"room_name": room_name}).count() > 0:
+            # If the room exists, join the room
+            return join_room(room_name, game_master)
+        game_params = dict()
+        if game_name == 'Overthrown':
+            game_params["approval_timer"] = "disabled"
+        return rooms.insert_one(dict(room_name=room_name,
+            game_master=game_master,
+            is_private=is_private,
+            game_name=game_name,
+            players=[game_master],
+            game_state='waiting',
+            game_data=dict(),
+            game_params=game_params))
+    def delete_room(room_name):
+        query={"room_name": room_name}
+        rooms.delete_many(query)
+    def join_room(room_name, user_name):
+        if rooms.find({"room_name": room_name}).count() == 0:
+            room = create_room(room_name, user_name)
+        room = rooms.find_one({"room_name": room_name})
+        myquery={"room_name": room_name}
+        players = []
+        if "players" in room:
+            players = room["players"]
+        if user_name not in players:
+            players.append(user_name)
+            newvalues = {"$set": {"players": players}}
+            rooms.update_one(myquery, newvalues)
+    def modify_room(room_name, action, params=dict()):
+        query={"room_name": room_name}
+        if action == 'waiting':
+            query={"room_name": room_name}
+            newvalues = {"$set": {"game_state": "waiting"}}
+            rooms.update_one(query, newvalues)
+        elif action == 'started':
+            query={"room_name": room_name, "game_state": "waiting",
+                    "game_name": "Overthrown"}
+            room = rooms.find_one(query);
+            if room is not None:
+                newvalues = {"$set": {
+                    "game_state": "started",
+                    "game_data": create_game(room)}
+                }
+                rooms.update_one(query, newvalues)
+
+    def create_game(room):
+        deck = []
+        for item in ["Duke", "Cantessa", "Assassin", "Ambassador", "Captain"]:
+            for i in range(3):
+                deck.append(item)
+        random.shuffle(deck)
+        players = []
+        for item in room["players"]:
+            player = dict(user_name=item, coins=2, cards = [])
+            for i in range(2):
+                if len(deck) > 0:
+                    player["cards"].append(deck.pop())
+            players.append(player)
+        grave_yard = []
+        action_log = []
+        if len(players) > 0:
+            waiting_for = [dict(kind='turn', user_name=random.choice(players)["user_name"])]
+        else:
+            waiting_for = []
+        return dict(deck=deck,
+            players=players,
+            grave_yard=grave_yard,
+            action_log=action_log,
+            waiting_for=waiting_for)
+
+
+
+
+    create_room('sk', 'p1', True, 'Overthrown')
+    join_room('sk', 'p2')
+    join_room('sk', 'p3')
+    join_room('sk', 'p4')
+    modify_room('sk', 'started')
+    myquery = dict()
+    import pprint
+    pp = pprint.PrettyPrinter(indent=4)
+    for item in rooms.find(myquery):
+        pp.pprint(item)
+    rooms.drop()
+
+
+    #x = mycoll.insert_one(dict(user_name='steve'))
+    #print(x.inserted_id)
+    #myquery = dict(user_name='steve')
+    #for item in mycoll.find(myquery):
+    #    print(item)
+    #print(myclient.list_database_names())
+    # game is one mongodb document and if two people access something at the same time their browser is just told to try again and it does
+    # mycoll.drop()
     return jsonify(dict(hi=1))
 
 @app.route('/')
