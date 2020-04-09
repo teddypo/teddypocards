@@ -131,6 +131,9 @@ def mongo():
             elif action == "tax" and item["kind"] == "turn" and item["user_name"] == user_name:
                 room["game_data"]["waiting_for"] = []
                 allowed = True
+            elif action.startswith("steal") and item["kind"] == "turn" and item["user_name"] == user_name:
+                room["game_data"]["waiting_for"] = []
+                allowed = True
             elif action == "allow" and item["kind"] == "block" and item["user_name"] == user_name:
                 room["game_data"]["waiting_for"].remove(dict(kind="block", user_name=user_name))
                 allowed = True
@@ -194,6 +197,13 @@ def mongo():
                         card = player["cards"].pop(discard_index)
                         room["game_data"]["grave_yard"].append(card)
                         break
+        for item in players:
+            if action.replace("steal", "") == item["user_name"]:
+                stolen = min(2, item["coins"])
+                item["coins"] -= stolen
+        for item in players:
+            if action.startswith("steal") and item["user_name"] == user_name:
+                item["coins"] += stolen
 
         if action == "block":
             room["game_data"]["players"] = temp_backup
@@ -260,7 +270,7 @@ def mongo():
         if action == 'income':
             next_player = get_next_player_name(room["game_data"], user_name)
             room["game_data"]["waiting_for"].append(dict(kind='turn', user_name=next_player))
-        elif action == 'foreign_aid':
+        elif action == 'foreign_aid' or action == "tax" or action.startswith("steal"):
             if room["game_params"]["approval_timer"] == "disabled":
                 next_player = get_next_player_name(room["game_data"], user_name)
                 room["game_data"]["waiting_for"].append(dict(kind='turn', user_name=next_player))
@@ -355,6 +365,13 @@ def mongo():
     modify_room('sk', 'play_action', params=dict(user_name="p3", action="challenge")) # p3 makes a correct accusation p1 will have to pay
     modify_room('sk', 'play_action', params=dict(user_name="p1", action="reveal1")) # p1 has to grave something
     modify_room('sk', 'play_action', params=dict(user_name="p4", action="tax"))
+    modify_room('sk', 'play_action', params=dict(user_name="p1", action="stealp2"))
+    modify_room('sk', 'play_action', params=dict(user_name="p2", action="stealp4"))
+    modify_room('sk', 'play_action', params=dict(user_name="p3", action="stealp4"))
+    modify_room('sk', 'play_action', params=dict(user_name="p4", action="tax"))
+    modify_room('sk', 'play_action', params=dict(user_name="p2", action="block"))
+    modify_room('sk', 'play_action', params=dict(user_name="p1", action="stealp4"))
+    modify_room('sk', 'play_action', params=dict(user_name="p2", action="stealp4"))
     myquery = dict()
     for item in rooms.find(myquery):
         pp.pprint(item)
