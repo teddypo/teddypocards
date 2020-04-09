@@ -21,16 +21,12 @@
             <tr id="user_row{{loop.index0}}">
 			{% endif %}
 				<td scope="col">{{player.user_name}}</td>
-                <td scope="col" id="coins{{loop.index0}}">{{player.n_coins}}</td>
+                <td scope="col" id="coins{{loop.index0}}">{{player.coins}}</td>
 				{% for i in range(2) %}
 				{% if player.cards|length < (i+1) %}
 				<td scope="col"></td>
-				{% elif player.cards[i].hidden and player.user_name != user_name%}
-				<td scope="col">Hidden</td>
-				{% elif not player.cards[i].hidden %}
-				<td scope="col"><b>{{player.cards[i].name}}</b></td>
-				{% else %}
-                <td scope="col" id="mycard{{loop.index0}}">{{player.cards[i].name}}</td>
+				{% else%}
+				<td scope="col"><b>{{player.cards[i]}}</b></td>
 				{% endif %}
 				{% endfor %}
 			</tr>

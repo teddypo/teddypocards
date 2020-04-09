@@ -482,7 +482,7 @@ def mongo():
     return jsonify(dict(hi=1))
 
 @app.route('/get_game_state/<user_name>/<room_name>')
-def get_game_state(user_name, room_name):
+def get_game_state(user_name, room_name, to_jsonify=True):
     myclient = pymongo.MongoClient(app.config["MONGOSTRING"])
     mydb = myclient["dev_db"]
     rooms = mydb["room"]
@@ -497,14 +497,19 @@ def get_game_state(user_name, room_name):
     if room["game_params"]["keep_grave_sorted"]:
         game_data["grave_yard"] = sorted(game_data["grave_yard"])
     del game_data["prev_players"]
-    return jsonify(room["game_data"])
+    if to_jsonify:
+        return jsonify(room["game_data"])
+    else:
+        return room["game_data"]
 
 @app.route('/mongo_play_page/<user_name>/<room_name>')
 def mongo_play_page(user_name, room_name):
+    game_data = get_game_state(user_name, room_name, to_jsonify=False)
     kwargs = dict(user_name=user_name,
             room_name=room_name,
-            activity_log=[],
-            waiting_for = [],
+            players=game_data["players"],
+            activity_log=game_data["action_log"],
+            waiting_for = game_data["waiting_for"],
             alternate_js=True)
     return render_template('mongo_play_page.html', **kwargs)
 
