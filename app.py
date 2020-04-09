@@ -18,6 +18,7 @@ def mongo():
     rooms = mydb["room"]
     rooms.drop()
 
+    random.seed(0)
     def create_room(room_name, game_master, is_private=False, game_name=''):
         if rooms.find({"room_name": room_name}).count() > 0:
             # If the room exists, join the room
@@ -64,6 +65,28 @@ def mongo():
                     "game_data": create_game(room)}
                 }
                 rooms.update_one(query, newvalues)
+        elif action == 'play_action':
+            query={"room_name": room_name, "game_state": "started",
+                    "game_name": "Overthrown"}
+            room = rooms.find_one(query);
+            if room is not None:
+                game_data = action_game(room, params) 
+                if game_data is not None:
+                    newvalues = {"$set": {
+                        "game_data": game_data}
+                    }
+                    rooms.update_one(query, newvalues)
+
+    def get_next_player_name(game_data, last_player):
+        players = game_data["players"]
+        found_last = False
+        for i in range(len(players)*2):
+            player = players[i % len(players)]
+            if found_last == True and len(player["cards"]) > 0:
+                return player["user_name"]
+            if player["user_name"] == last_player:
+                found_last = True
+        return 'this should never happen maybe increase you loop length'
 
     def create_game(room):
         deck = []
@@ -86,9 +109,42 @@ def mongo():
             waiting_for = []
         return dict(deck=deck,
             players=players,
+            prev_players=copy.deepcopy(players),
             grave_yard=grave_yard,
             action_log=action_log,
             waiting_for=waiting_for)
+    def action_game(room, params):
+        # Read some params
+        user_name = params["user_name"]
+        action = params["action"]
+
+        # Check if action is allowed and expire appropriate waiting_for actions
+        allowed = False
+        for item in room["game_data"]["waiting_for"]:
+            if action == "income" and item["kind"] == "turn" and item["user_name"] == user_name:
+                room["game_data"]["waiting_for"] = []
+                allowed = True
+        if not allowed:
+            return None
+
+        # Add the allowed action to the log
+        room["game_data"]["action_log"].append(params)
+
+        # Backup the game state (for potential blocks)
+        room["game_data"]["prev_players"] = copy.deepcopy(room["game_data"]["players"])
+
+        # Modify cards and coins with the turn actions
+        players = room["game_data"]["players"]
+        for item in players:
+            if action == "income" and item["user_name"] == user_name:
+                item["coins"] += 1
+
+        # Add next actions people game can wait for
+        if action == 'income':
+            next_player = get_next_player_name(room["game_data"], user_name)
+            room["game_data"]["waiting_for"].append(dict(kind='turn', user_name=next_player))
+
+        return room["game_data"]
 
 
 
@@ -98,6 +154,14 @@ def mongo():
     join_room('sk', 'p3')
     join_room('sk', 'p4')
     modify_room('sk', 'started')
+    action_params = dict()
+    action_params["user_name"] = "p2"
+    action_params["action"] = "income"
+    modify_room('sk', 'play_action', action_params) # fail cuz not his turn
+    action_params = dict()
+    action_params["user_name"] = "p3"
+    action_params["action"] = "income"
+    modify_room('sk', 'play_action', action_params)
     myquery = dict()
     import pprint
     pp = pprint.PrettyPrinter(indent=4)
