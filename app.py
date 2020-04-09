@@ -499,6 +499,13 @@ def get_game_state(user_name, room_name):
     del game_data["prev_players"]
     return jsonify(room["game_data"])
 
+@app.route('/mongo_play_page/<user_name>/<room_name>')
+def mongo_play_page(user_name, room_name):
+    kwargs = dict(user_name=user_name,
+            room_name=room_name,
+            activity_log=[])
+    return render_template('mongo_play_page.html', **kwargs)
+
 @app.route('/')
 def hello():
     return render_template('landing_page.html')

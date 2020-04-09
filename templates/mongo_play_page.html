@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+{% block bodycontent %}
+<div class="container">
+<div class="jumbotron">
+	<div class="row">
+	<div class="col-md-8 call-sm-12">
+	<table class="table">
+		<thead>
+			<th scope="col">user_name</th>
+			<th scope="col">Coins</th>
+			<th scope="col">Card 1</th>
+			<th scope="col">Card 2</th>
+		</thead>
+		<tbody>
+			{% for player in players %}
+			{% if loop.index0 == turn %}
+            <tr class="table-primary" id="user_row{{loop.index0}}">
+			{% elif player.user_name == user_name %}
+            <tr class="table-success" id="user_row{{loop.index0}}">
+			{% else %}
+            <tr id="user_row{{loop.index0}}">
+			{% endif %}
+				<td scope="col">{{player.user_name}}</td>
+                <td scope="col" id="coins{{loop.index0}}">{{player.n_coins}}</td>
+				{% for i in range(2) %}
+				{% if player.cards|length < (i+1) %}
+				<td scope="col"></td>
+				{% elif player.cards[i].hidden and player.user_name != user_name%}
+				<td scope="col">Hidden</td>
+				{% elif not player.cards[i].hidden %}
+				<td scope="col"><b>{{player.cards[i].name}}</b></td>
+				{% else %}
+                <td scope="col" id="mycard{{loop.index0}}">{{player.cards[i].name}}</td>
+				{% endif %}
+				{% endfor %}
+			</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+	</div>
+	<div class="col-md-4">
+	  <ul class="list-group">
+		<li class="list-group-item">GraveYard</li>
+		{% for card in graveyard %}
+		<li class="list-group-item">{{card.name}}</li>
+		{% endfor %}
+	  </ul>
+	  <ul class="list-group">
+		  <li class="list-group-item">Deck: {{deck_size}} cards</li>
+	  </ul>
+	</div>
+	</div>
+{% if user_name != whose_turn %}
+{% set dis_str = "disabled" %}
+{% else %}
+{% set dis_str = "" %}
+{% endif %}
+<button type="button" class="btn btn-dark turn_button" id="takeincome" {{dis_str}}>Income</button>
+<button type="button" class="btn btn-dark turn_button" id="takeforeignaid" {{dis_str}}>Foreign Aid</button>
+<button type="button" class="btn btn-dark turn_button" {{dis_str}}>Tax</button>
+<div class="dropdown button-row">
+  <button type="button" class="btn btn-dark dropdown-toggle turn_button" type="button" id="stealDrop" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" {{dis_str}}>Steal</button>
+  <div class="dropdown-menu" aria-labelledby="stealDrop">
+	  {% for player in players %}
+	  <a class="dropdown-item" href="#">{{player.user_name}}</a>
+	  {% endfor %}
+  </div>
+</div>
+<div class="dropdown button-row">
+  <button type="button" class="btn btn-dark dropdown-toggle turn_button" type="button" id="assassinateDrop" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" {{dis_str}}>Assassinate</button>
+  <div class="dropdown-menu" aria-labelledby="assassinateDrop">
+	  {% for player in players %}
+	  <a class="dropdown-item" href="#">{{player.user_name}}</a>
+	  {% endfor %}
+  </div>
+</div>
+<div class="dropdown button-row" id="exchangeDropWrap">
+  <button type="button" class="btn btn-dark dropdown-toggle turn_button" type="button" id="exchangeDrop" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" {{dis_str}}>Exchange</button>
+  <div class="dropdown-menu" aria-labelledby="exchangeDrop" id="exchangeDropContent">
+	  <!--<a class="dropdown-item" href="#" id="exchangeCard1">Discard RandCard</a>
+	  <a class="dropdown-item" href="#" id="exchangeCard2">Discard RandCard</a>
+	  <a class="dropdown-item" href="#" id="exchangeCard3">Discard RandCard</a>
+	  <a class="dropdown-item" href="#" id="exchangeCard4">Discard RandCard</a>-->
+  </div>
+</div>
+<div class="dropdown button-row">
+  <button type="button" class="btn btn-dark dropdown-toggle turn_button" type="button" id="infectDrop" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" {{dis_str}}>Coup</button>
+  <div class="dropdown-menu" aria-labelledby="infectDrop">
+	  {% for player in players %}
+	  <a class="dropdown-item" href="#">{{player.user_name}}</a>
+	  {% endfor %}
+  </div>
+</div>
+
+<nav class="navbar navbar-light bg-light">
+	<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#expandedHistory" aria-controls="expandedHistory" aria-expanded="false"aria-label="Toggle longer history">
+		<span class="navbar-toggler-icon"></span>
+	</button>
+	<a class="navbar-brand" href="#" id="latest_activity">{{activity_log[activity_log|length - 1]}}</a>
+	<form class="form-inline">
+		<button class="btn btn-outline-danger" type="button" id="challenge_button">Challenge</button>
+		<button class="btn btn-outline-dark" type="button" id="block_button">Block</button>
+	</form>
+</nav>
+<div class="collapse" id="expandedHistory">
+  <ul class="list-group" id="act_list">
+    {% for item in activity_log|reverse %}
+    {% if loop.index0 != 0 %}
+    <li class="list-group-item">{{item}}</li>
+    {% endif %}
+    {% endfor %}
+  </ul>
+</div>
+
+
+</div>
+<div class="modal fade" id="discardCardModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="staticBackdropLabel">Death</h5>
+      </div>
+      <div class="modal-body">
+	<p>You've been killed...Assassinations can be challanged and blocked. Coups cannot. You must challange, block, or choose a card to discard</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-danger" data-dismiss="modal">Challange</button>
+        <button type="button" class="btn btn-dark" data-dismiss="modal">Block</button>
+        <button type="button" class="btn btn-success" data-dismiss="modal" id="discard0">DiscardCard1</button>
+        <button type="button" class="btn btn-success" data-dismiss="modal" id="discard1">DiscardCard2</button>
+      </div>
+    </div>
+  </div>
+</div>
+<button data-toggle="modal" data-target="#discardCardModal">LaunchTestModal</button>
+</div>
+{% endblock %}
