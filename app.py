@@ -131,6 +131,9 @@ def mongo():
             elif action == "allow" and item["kind"] == "block" and item["user_name"] == user_name:
                 room["game_data"]["waiting_for"].remove(dict(kind="block", user_name=user_name))
                 allowed = True
+            elif action == "allow" and item["kind"] == "challenge" and item["user_name"] == user_name:
+                room["game_data"]["waiting_for"].remove(dict(kind="challenge", user_name=user_name))
+                allowed = True
             elif action == "block" and item["kind"] == "block" and item["user_name"] == user_name:
                 room["game_data"]["waiting_for"] = []
                 allowed = True
@@ -214,6 +217,9 @@ def mongo():
     modify_room('sk', 'play_action', params=dict(user_name="p3", action="allow"))
     modify_room('sk', 'play_action', params=dict(user_name="p1", action="foreign_aid"))
     modify_room('sk', 'play_action', params=dict(user_name="p2", action="block")) # rightful duke doing a righteous block
+    modify_room('sk', 'play_action', params=dict(user_name="p1", action="allow"))
+    modify_room('sk', 'play_action', params=dict(user_name="p3", action="allow"))
+    modify_room('sk', 'play_action', params=dict(user_name="p4", action="allow"))
     myquery = dict()
     import pprint
     pp = pprint.PrettyPrinter(indent=4)
