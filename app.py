@@ -27,6 +27,7 @@ def mongo():
         if game_name == 'Overthrown':
             game_params["approval_timer"] = "disabled"
             # game_params["approval_timer"] = "infinite"
+            game_params["keep_grave_sorted"] = True
         return rooms.insert_one(dict(room_name=room_name,
             game_master=game_master,
             is_private=is_private,
@@ -468,7 +469,6 @@ def mongo():
     myquery = dict()
     for item in rooms.find(myquery):
         pp.pprint(item)
-    rooms.drop()
 
 
     #x = mycoll.insert_one(dict(user_name='steve'))
@@ -480,6 +480,24 @@ def mongo():
     # game is one mongodb document and if two people access something at the same time their browser is just told to try again and it does
     # mycoll.drop()
     return jsonify(dict(hi=1))
+
+@app.route('/get_game_state/<user_name>/<room_name>')
+def get_game_state(user_name, room_name):
+    myclient = pymongo.MongoClient(app.config["MONGOSTRING"])
+    mydb = myclient["dev_db"]
+    rooms = mydb["room"]
+    room = rooms.find_one({"room_name": room_name})
+    game_data = room["game_data"]
+    for item in game_data["players"]:
+        if item["user_name"] != user_name:
+            for i, card in enumerate(item["cards"]):
+                item["cards"][i] = "hidden"
+    for i, item in enumerate(game_data["deck"]):
+        game_data["deck"][i] = "hidden"
+    if room["game_params"]["keep_grave_sorted"]:
+        game_data["grave_yard"] = sorted(game_data["grave_yard"])
+    del game_data["prev_players"]
+    return jsonify(room["game_data"])
 
 @app.route('/')
 def hello():
