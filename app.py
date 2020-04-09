@@ -140,7 +140,17 @@ def mongo():
             elif action == "challenge" and item["kind"] == "challenge" and item["user_name"] == user_name:
                 room["game_data"]["waiting_for"] = []
                 allowed = True
-                # At the bottom i'll need to add what happens next which is challenge response reveal
+            elif action.startswith("reveal") and item["kind"] == "reveal" and item["user_name"] == user_name:
+                reveal_index = int(action.replace("reveal", ""))
+                for player in room["game_data"]["players"]:
+                    if player["user_name"] == user_name:
+                        if reveal_index >= len(player["cards"]):
+                            print('notallowed')
+                            allowed=False
+                        else:
+                            room["game_data"]["waiting_for"] = []
+                            allowed = True
+                        break
         if not allowed:
             return None
 
@@ -148,7 +158,7 @@ def mongo():
         room["game_data"]["action_log"].append(params)
 
         # Backup the game state (for potential blocks)
-        if action != "allow" and action != "challenge":
+        if action != "allow" and action != "challenge" and not action.startswith("reveal"):
             # action and challenge dont change game state and shouldnt blow away valuable saved backup
             # harmless for income to do a backup
             # required for foreign aid to do a backup
@@ -163,8 +173,66 @@ def mongo():
                 item["coins"] += 1
             elif action == "foreign_aid" and item["user_name"] == user_name:
                 item["coins"] += 2
-            elif action == "block" and item["user_name"] == user_name:
-                room["game_data"]["players"] = temp_backup
+        if action == "block":
+            room["game_data"]["players"] = temp_backup
+        elif action.startswith("reveal"):
+            # check legitimacy
+            reveal_index = int(action.replace("reveal", ""))
+            for item in reversed(room["game_data"]["action_log"]):
+                if item["action"] in ["income", "foreign_aid", "tax", "steal", "assassin", "exchange", "coup", "block"]:
+                    challenged_action = item["action"]
+                    break
+            for item in reversed(room["game_data"]["action_log"]):
+                if item["action"] in ["income", "foreign_aid", "tax", "steal", "assassin", "exchange", "coup"]:
+                    preblock_action = item["action"]
+                    break
+            for item in room["game_data"]["players"]:
+                if user_name == item["user_name"]:
+                    revealed_card = item["cards"].pop(reveal_index)
+                    break
+            claim_prooved = False
+            if challenged_action == 'block':
+                if preblock_action == 'foreign_aid':
+                    if revealed_card == 'Duke':
+                        claim_prooved = True
+                elif preblock_action == 'steal':
+                    if revealed_card == 'Captain' or revealed_card == "Ambassador":
+                        claim_prooved = True
+                elif preblock_action == 'assassinate':
+                    if revealed_card == 'Cantessa':
+                        claim_prooved = True
+            elif challenged_action == 'tax':
+                if revealed_card == 'Duke':
+                    claim_prooved = True
+            elif challenged_action == 'steal':
+                if revealed_card == 'Captain':
+                    claim_prooved = True
+            elif challenged_action == 'assassinate':
+                if revealed_card == "Assassin":
+                    claim_prooved = True
+            elif challenged_action == 'exchange':
+                if revealed_card == 'Ambassador':
+                    claim_prooved = True
+            if claim_prooved:
+                # player that just did the reveal gets their card sent to the deck and they get a new one
+                room["game_data"]["deck"].append(revealed_card)
+                random.shuffle(room["game_data"]["deck"])
+                for item in room["game_data"]["players"]:
+                    if user_name == item["user_name"]:
+                        if len(room["game_data"]["deck"]) > 0:
+                            item["cards"].append(room["game_data"]["deck"].pop())
+                # the challenger must be punished
+                print('claim prooved - punish the challanger at the end of this function')
+            else:
+                # Restore game state to before the saved (challenged) action
+                room["game_data"]["players"] = copy.deepcopy(room["game_data"]["prev_players"])
+                # Punish the challenged player by graveyarding the card they just revealed
+                for item in room["game_data"]["players"]:
+                    if user_name == item["user_name"]:
+                        # gotta redo the pop here because the deepcopy above will undo it
+                        revealed_card = item["cards"].pop(reveal_index)
+                        break
+                room["game_data"]["grave_yard"].append(revealed_card)
 
         # Add next actions game can wait for
         if action == 'income':
@@ -199,6 +267,21 @@ def mongo():
                     challenged_user = item["user_name"]
                     break
             room["game_data"]["waiting_for"].append(dict(kind='reveal', user_name=challenged_user))
+        elif action.startswith("reveal"):
+            if claim_prooved:
+                # next action must be challenger penalized
+                for item in reversed(room["game_data"]["action_log"]):
+                    if item["action"] == "challenge":
+                        challenger = item["user_name"]
+                        break
+                room["game_data"]["waiting_for"].append(dict(kind='discard', user_name=challenger))
+            else:
+                # Challenge is over - the pretender was caught lets move the game along to the next turn
+                for item in reversed(room["game_data"]["action_log"]):
+                    if item["action"] in ["income", "foreign_aid", "tax", "steal", "assassin", "exchange", "coup"]:
+                        next_player = get_next_player_name(room["game_data"], item["user_name"])
+                        break
+                room["game_data"]["waiting_for"].append(dict(kind='turn', user_name=next_player))
 
 
         return room["game_data"]
@@ -206,6 +289,8 @@ def mongo():
 
 
 
+    import pprint
+    pp = pprint.PrettyPrinter(indent=4)
     create_room('sk', 'p1', True, 'Overthrown')
     join_room('sk', 'p2')
     join_room('sk', 'p3')
@@ -234,9 +319,8 @@ def mongo():
     modify_room('sk', 'play_action', params=dict(user_name="p2", action="foreign_aid"))
     modify_room('sk', 'play_action', params=dict(user_name="p1", action="block")) # another rightful duke doing a righteous challenge
     modify_room('sk', 'play_action', params=dict(user_name="p2", action="challenge")) # p2 makes an erroneous challenge
+    modify_room('sk', 'play_action', params=dict(user_name="p1", action="reveal0")) # p1 prooves he is the duke
     myquery = dict()
-    import pprint
-    pp = pprint.PrettyPrinter(indent=4)
     for item in rooms.find(myquery):
         pp.pprint(item)
     rooms.drop()
