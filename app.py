@@ -120,6 +120,7 @@ def mongo():
         action = params["action"]
 
         # Check if action is allowed and expire appropriate waiting_for actions
+        # TODO MORE ALLOWED VALIDATION IN HERE LIKE DOES THAT PERSON EXIST OR DO YOU HAVE THE CARDS TO DISCARD
         allowed = False
         for item in room["game_data"]["waiting_for"]:
             if action == "income" and item["kind"] == "turn" and item["user_name"] == user_name:
@@ -135,6 +136,12 @@ def mongo():
                 room["game_data"]["waiting_for"] = []
                 allowed = True
             elif action.startswith("assassinate") and item["kind"] == "turn" and item["user_name"] == user_name:
+                room["game_data"]["waiting_for"] = []
+                allowed = True
+            elif action == "exchange" and item["kind"] == "turn" and item["user_name"] == user_name:
+                room["game_data"]["waiting_for"] = []
+                allowed = True
+            elif action.startswith("doublediscard") and item["kind"] == "doublediscard" and item["user_name"] == user_name:
                 room["game_data"]["waiting_for"] = []
                 allowed = True
             elif action == "allow" and item["kind"] == "block" and item["user_name"] == user_name:
@@ -176,7 +183,7 @@ def mongo():
         room["game_data"]["action_log"].append(params)
 
         # Backup the game state (for potential blocks)
-        if action != "allow" and action != "challenge" and not action.startswith("reveal") and not action.startswith('discard'):
+        if action != "allow" and action != "challenge" and not action.startswith("reveal") and not action.startswith('discard') and not action.startswith('doublediscard'):
             # action and challenge dont change game state and shouldnt blow away valuable saved backup
             # harmless for income to do a backup
             # required for foreign aid to do a backup
@@ -193,6 +200,20 @@ def mongo():
                 item["coins"] += 2
             elif action == "tax" and item["user_name"] == user_name:
                 item["coins"] += 3
+            elif action == "exchange" and item["user_name"] == user_name:
+                deck = room["game_data"]["deck"]
+                if len(deck) > 0:
+                    random.shuffle(deck)
+                    item["cards"].append(deck.pop())
+                if len(deck) > 0:
+                    random.shuffle(deck)
+                    item["cards"].append(deck.pop())
+            elif action.startswith('doublediscard') and item["user_name"] == user_name:
+                tmp = action.replace("doublediscard", "")
+                idxes = sorted(list(int(i) for i in tmp.split("_")))
+                # do sorting then back to front for indexing issues
+                room["game_data"]["grave_yard"].append(item["cards"].pop(idxes[1]))
+                room["game_data"]["grave_yard"].append(item["cards"].pop(idxes[0]))
             elif action.startswith('discard') and item["user_name"] == user_name:
                 discard_index = int(action.replace("discard", ""))
                 for player in room["game_data"]["players"]:
@@ -304,6 +325,18 @@ def mongo():
             for item in room["game_data"]["players"]:
                 if item["user_name"] != user_name:
                     room["game_data"]["waiting_for"].append(dict(kind='challenge', user_name=item["user_name"]))
+        elif action == "exchange":
+            room["game_data"]["waiting_for"].append(dict(kind='doublediscard', user_name=user_name))
+        elif action.startswith("doublediscard"):
+            if room["game_params"]["approval_timer"] == "disabled":
+                next_player = get_next_player_name(room["game_data"], user_name)
+                room["game_data"]["waiting_for"].append(dict(kind='turn', user_name=next_player))
+            for item in room["game_data"]["players"]:
+                if item["user_name"] != user_name:
+                    room["game_data"]["waiting_for"].append(dict(kind='block', user_name=item["user_name"]))
+            for item in room["game_data"]["players"]:
+                if item["user_name"] != user_name:
+                    room["game_data"]["waiting_for"].append(dict(kind='challenge', user_name=item["user_name"]))
         elif action == "block":
             if room["game_params"]["approval_timer"] == "disabled":
                 for item in reversed(room["game_data"]["action_log"]):
@@ -395,6 +428,8 @@ def mongo():
     modify_room('sk', 'play_action', params=dict(user_name="p2", action="stealp4"))
     modify_room('sk', 'play_action', params=dict(user_name="p3", action="assassinatep4"))
     modify_room('sk', 'play_action', params=dict(user_name="p4", action="discard0"))
+    modify_room('sk', 'play_action', params=dict(user_name="p1", action="exchange"))
+    modify_room('sk', 'play_action', params=dict(user_name="p1", action="doublediscard0_2"))
     myquery = dict()
     for item in rooms.find(myquery):
         pp.pprint(item)
