@@ -84,7 +84,7 @@
   </div>
 </div>
 <div class="dropdown button-row">
-  <button type="button" class="btn btn-dark dropdown-toggle turn_button" type="button" id="infectDrop" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" {{dis_str}}>Coup</button>
+  <button type="button" class="btn btn-dark dropdown-toggle turn_button" type="button" id="infectDrop" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" {{dis_str}}>Infect</button>
   <div class="dropdown-menu" aria-labelledby="infectDrop">
 	  {% for player in players %}
 	  <a class="dropdown-item" href="#">{{player.user_name}}</a>
@@ -121,7 +121,7 @@
         <h5 class="modal-title" id="staticBackdropLabel">Death</h5>
       </div>
       <div class="modal-body">
-	<p>You've been killed...Assassinations can be challanged and blocked. Coups cannot. You must challange, block, or choose a card to discard</p>
+	<p>You've been killed...Assassinations can be challanged and blocked. Infects cannot. You must challange, block, or choose a card to discard</p>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-danger" data-dismiss="modal">Challange</button>
