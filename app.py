@@ -118,32 +118,40 @@ def mongo():
         # Read some params
         user_name = params["user_name"]
         action = params["action"]
+        coins = 0
+        for item in room["game_data"]["players"]:
+            if item["user_name"] == user_name:
+                coins = item["coins"]
 
         # Check if action is allowed and expire appropriate waiting_for actions
         # TODO MORE ALLOWED VALIDATION IN HERE LIKE DOES THAT PERSON EXIST OR DO YOU HAVE THE CARDS TO DISCARD
         allowed = False
         for item in room["game_data"]["waiting_for"]:
-            if action == "income" and item["kind"] == "turn" and item["user_name"] == user_name:
+            if action == "income" and item["kind"] == "turn" and item["user_name"] == user_name and coins < 10:
                 room["game_data"]["waiting_for"] = []
                 allowed = True
-            elif action == "foreign_aid" and item["kind"] == "turn" and item["user_name"] == user_name:
+            elif action == "foreign_aid" and item["kind"] == "turn" and item["user_name"] == user_name and coins < 10:
                 room["game_data"]["waiting_for"] = []
                 allowed = True
-            elif action == "tax" and item["kind"] == "turn" and item["user_name"] == user_name:
+            elif action == "tax" and item["kind"] == "turn" and item["user_name"] == user_name and coins < 10:
                 room["game_data"]["waiting_for"] = []
                 allowed = True
-            elif action.startswith("steal") and item["kind"] == "turn" and item["user_name"] == user_name:
+            elif action.startswith("steal") and item["kind"] == "turn" and item["user_name"] == user_name and coins < 10:
                 room["game_data"]["waiting_for"] = []
                 allowed = True
-            elif action.startswith("assassinate") and item["kind"] == "turn" and item["user_name"] == user_name:
+            elif action.startswith("assassinate") and item["kind"] == "turn" and item["user_name"] == user_name and coins < 10:
                 room["game_data"]["waiting_for"] = []
                 allowed = True
-            elif action == "exchange" and item["kind"] == "turn" and item["user_name"] == user_name:
+            elif action == "exchange" and item["kind"] == "turn" and item["user_name"] == user_name and coins < 10:
                 room["game_data"]["waiting_for"] = []
                 allowed = True
             elif action.startswith("doublediscard") and item["kind"] == "doublediscard" and item["user_name"] == user_name:
                 room["game_data"]["waiting_for"] = []
                 allowed = True
+            elif action.startswith("coup") and item["kind"] == "turn" and item["user_name"] == user_name:
+                if coins >= 7:
+                    room["game_data"]["waiting_for"] = []
+                    allowed=True
             elif action == "allow" and item["kind"] == "block" and item["user_name"] == user_name:
                 room["game_data"]["waiting_for"].remove(dict(kind="block", user_name=user_name))
                 allowed = True
@@ -214,6 +222,8 @@ def mongo():
                 # do sorting then back to front for indexing issues
                 room["game_data"]["grave_yard"].append(item["cards"].pop(idxes[1]))
                 room["game_data"]["grave_yard"].append(item["cards"].pop(idxes[0]))
+            elif action.startswith('coup') and item["user_name"] == user_name:
+                item["coins"] -= 7
             elif action.startswith('discard') and item["user_name"] == user_name:
                 discard_index = int(action.replace("discard", ""))
                 for player in room["game_data"]["players"]:
@@ -235,11 +245,11 @@ def mongo():
             # check legitimacy
             reveal_index = int(action.replace("reveal", ""))
             for item in reversed(room["game_data"]["action_log"]):
-                if item["action"] in ["income", "foreign_aid", "tax", "steal", "assassin", "exchange", "coup", "block"]:
+                if item["action"] in ["tax", "exchange", "block"] or item["action"].startswith("steal") or item["action"].startswith("assassinate"):
                     challenged_action = item["action"]
                     break
             for item in reversed(room["game_data"]["action_log"]):
-                if item["action"] in ["income", "foreign_aid", "tax", "steal", "assassin", "exchange", "coup"]:
+                if item["action"] in ["foreign_aid", "exchange"] or item["action"].startswith("steal") or item["action"].startswith("assassinate"):
                     preblock_action = item["action"]
                     break
             for item in room["game_data"]["players"]:
@@ -251,19 +261,19 @@ def mongo():
                 if preblock_action == 'foreign_aid':
                     if revealed_card == 'Duke':
                         claim_prooved = True
-                elif preblock_action == 'steal':
+                elif preblock_action.startswith('steal'):
                     if revealed_card == 'Captain' or revealed_card == "Ambassador":
                         claim_prooved = True
-                elif preblock_action == 'assassinate':
+                elif preblock_action.startswith('assassinate'):
                     if revealed_card == 'Cantessa':
                         claim_prooved = True
             elif challenged_action == 'tax':
                 if revealed_card == 'Duke':
                     claim_prooved = True
-            elif challenged_action == 'steal':
+            elif challenged_action.startswith('steal'):
                 if revealed_card == 'Captain':
                     claim_prooved = True
-            elif challenged_action == 'assassinate':
+            elif challenged_action.startwith('assassinate'):
                 if revealed_card == "Assassin":
                     claim_prooved = True
             elif challenged_action == 'exchange':
@@ -313,7 +323,7 @@ def mongo():
                     room["game_data"]["waiting_for"].append(dict(kind='challenge', user_name=item["user_name"]))
         elif action == "allow" and len(room["game_data"]["waiting_for"]) == 0:
             for item in reversed(room["game_data"]["action_log"]):
-                if item["action"] in ["income", "foreign_aid", "tax", "steal", "assassin", "exchange", "coup"]:
+                if item["action"] in ["income", "foreign_aid", "tax", "exchange"] or item["action"].startswith("steal") or item["action"].startswith("assassinate") or item["action"].startswith("coup"):
                     next_player = get_next_player_name(room["game_data"], item["user_name"])
                     break
             room["game_data"]["waiting_for"].append(dict(kind='turn', user_name=next_player))
@@ -337,10 +347,13 @@ def mongo():
             for item in room["game_data"]["players"]:
                 if item["user_name"] != user_name:
                     room["game_data"]["waiting_for"].append(dict(kind='challenge', user_name=item["user_name"]))
+        elif action.startswith('coup'):
+            victim = action.replace('coup', '')
+            room["game_data"]["waiting_for"].append(dict(kind='discard', user_name=victim))
         elif action == "block":
             if room["game_params"]["approval_timer"] == "disabled":
                 for item in reversed(room["game_data"]["action_log"]):
-                    if item["action"] in ["income", "foreign_aid", "tax", "steal", "assassin", "exchange", "coup"]:
+                    if item["action"] in ["income", "foreign_aid", "tax", "exchange"] or item["action"].startswith("steal") or item["action"].startswith("assassinate") or item["action"].startswith("coup"):
                         next_player = get_next_player_name(room["game_data"], item["user_name"])
                         break
                 room["game_data"]["waiting_for"].append(dict(kind='turn', user_name=next_player))
@@ -349,7 +362,7 @@ def mongo():
                     room["game_data"]["waiting_for"].append(dict(kind='challenge', user_name=item["user_name"]))
         elif action == "challenge":
             for item in reversed(room["game_data"]["action_log"]):
-                if item["action"] in ["income", "foreign_aid", "tax", "steal", "assassin", "exchange", "coup", "block"]:
+                if item["action"] in ["income", "foreign_aid", "tax", "exchange", "block"] or item["action"].startswith("steal") or item["action"].startswith("assassinate") or item["action"].startswith("coup"):
                     challenged_user = item["user_name"]
                     break
             room["game_data"]["waiting_for"].append(dict(kind='reveal', user_name=challenged_user))
@@ -364,14 +377,14 @@ def mongo():
             else:
                 # Challenge is over - the pretender was caught lets move the game along to the next turn
                 for item in reversed(room["game_data"]["action_log"]):
-                    if item["action"] in ["income", "foreign_aid", "tax", "steal", "assassin", "exchange", "coup"]:
+                    if item["action"] in ["income", "foreign_aid", "tax", "exchange"] or item["action"].startswith("steal") or item["action"].startswith("assassinate") or item["action"].startswith("coup"):
                         next_player = get_next_player_name(room["game_data"], item["user_name"])
                         break
                 room["game_data"]["waiting_for"].append(dict(kind='turn', user_name=next_player))
         elif action.startswith("discard"):
             # Challenge is over - the false accuser was punished lets move the game along
             for item in reversed(room["game_data"]["action_log"]):
-                if item["action"] in ["income", "foreign_aid", "tax", "steal", "assassin", "exchange", "coup"]:
+                if item["action"] in ["income", "foreign_aid", "tax", "exchange"] or item["action"].startswith("steal") or item["action"].startswith("assassinate") or item["action"].startswith("coup"):
                     next_player = get_next_player_name(room["game_data"], item["user_name"])
                     break
             room["game_data"]["waiting_for"].append(dict(kind='turn', user_name=next_player))
@@ -428,8 +441,30 @@ def mongo():
     modify_room('sk', 'play_action', params=dict(user_name="p2", action="stealp4"))
     modify_room('sk', 'play_action', params=dict(user_name="p3", action="assassinatep4"))
     modify_room('sk', 'play_action', params=dict(user_name="p4", action="discard0"))
+    modify_room('sk', 'play_action', params=dict(user_name="p4", action="income")) # this was added in late when a bug was fixed
     modify_room('sk', 'play_action', params=dict(user_name="p1", action="exchange"))
     modify_room('sk', 'play_action', params=dict(user_name="p1", action="doublediscard0_2"))
+    modify_room('sk', 'play_action', params=dict(user_name="p2", action="income"))
+    modify_room('sk', 'play_action', params=dict(user_name="p3", action="coupp1"))
+    modify_room('sk', 'play_action', params=dict(user_name="p1", action="discard0"))
+    modify_room('sk', 'play_action', params=dict(user_name="p4", action="income"))
+    modify_room('sk', 'play_action', params=dict(user_name="p2", action="tax"))
+    modify_room('sk', 'play_action', params=dict(user_name="p3", action="tax"))
+    modify_room('sk', 'play_action', params=dict(user_name="p4", action="tax"))
+    modify_room('sk', 'play_action', params=dict(user_name="p2", action="tax"))
+    modify_room('sk', 'play_action', params=dict(user_name="p3", action="tax"))
+    modify_room('sk', 'play_action', params=dict(user_name="p4", action="tax"))
+    modify_room('sk', 'play_action', params=dict(user_name="p2", action="tax"))
+    modify_room('sk', 'play_action', params=dict(user_name="p3", action="tax"))
+    modify_room('sk', 'play_action', params=dict(user_name="p4", action="tax")) # lets test out what happens when you have 10 coins
+    modify_room('sk', 'play_action', params=dict(user_name="p2", action="steamp3")) # he must coup
+    modify_room('sk', 'play_action', params=dict(user_name="p2", action="tax")) # fails
+    modify_room('sk', 'play_action', params=dict(user_name="p2", action="income")) # fails
+    modify_room('sk', 'play_action', params=dict(user_name="p2", action="foreign_aid")) # fails
+    modify_room('sk', 'play_action', params=dict(user_name="p2", action="assassinatep4")) # fails
+    modify_room('sk', 'play_action', params=dict(user_name="p2", action="coupp3"))
+    modify_room('sk', 'play_action', params=dict(user_name="p3", action="discard0"))
+
     myquery = dict()
     for item in rooms.find(myquery):
         pp.pprint(item)
