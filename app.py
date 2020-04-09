@@ -345,6 +345,10 @@ def mongo():
     modify_room('sk', 'play_action', params=dict(user_name="p2", action="challenge")) # p2 makes an erroneous challenge
     modify_room('sk', 'play_action', params=dict(user_name="p1", action="reveal0")) # p1 prooves he is the duke
     modify_room('sk', 'play_action', params=dict(user_name="p2", action="discard0")) # gotta pay for your erroneous challenge
+    modify_room('sk', 'play_action', params=dict(user_name="p3", action="foreign_aid"))
+    modify_room('sk', 'play_action', params=dict(user_name="p1", action="block")) # p1 blocks but is no longer the duke
+    modify_room('sk', 'play_action', params=dict(user_name="p3", action="challenge")) # p3 makes a correct accusation p1 will have to pay
+    modify_room('sk', 'play_action', params=dict(user_name="p1", action="reveal1")) # p1 has to grave something
     myquery = dict()
     for item in rooms.find(myquery):
         pp.pprint(item)
