@@ -12,25 +12,114 @@ import uuid
 import pymongo
 
 db_prefix = '/var/www/TeddyPoCards/'
+myclient = pymongo.MongoClient(app.config["MONGOSTRING"])
+mydb = myclient["dev_db"]
 
 @app.route('/mon')
 def mongo():
-    myclient = pymongo.MongoClient(app.config["MONGOSTRING"])
-    mydb = myclient["dev_db"]
     rooms = mydb["room"]
     rooms.drop()
 
+    rc = RC(rooms)
     random.seed(0)
-    def create_room(room_name, game_master, is_private=False, game_name=''):
-        if rooms.find({"room_name": room_name}).count() > 0:
+    import pprint
+    pp = pprint.PrettyPrinter(indent=4)
+    rc.create_room('sk', 'p1', True, 'Spanish Flu')
+    rc.join_room('sk', 'p2')
+    rc.join_room('sk', 'p3')
+    rc.join_room('sk', 'p4')
+    rc.modify_room('sk', 'started')
+    action_params = dict()
+    action_params["user_name"] = "p2"
+    action_params["action"] = "income"
+    rc.modify_room('sk', 'play_action', action_params) # fail cuz not his turn
+    action_params = dict()
+    action_params["user_name"] = "p3"
+    action_params["action"] = "income"
+    rc.modify_room('sk', 'play_action', action_params)
+    action_params = dict()
+    action_params["user_name"] = "p4"
+    action_params["action"] = "foreign_aid"
+    rc.modify_room('sk', 'play_action', action_params)
+    rc.modify_room('sk', 'play_action', params=dict(user_name="p1", action="allow"))
+    rc.modify_room('sk', 'play_action', params=dict(user_name="p2", action="allow"))
+    rc.modify_room('sk', 'play_action', params=dict(user_name="p3", action="allow"))
+    rc.modify_room('sk', 'play_action', params=dict(user_name="p1", action="foreign_aid"))
+    rc.modify_room('sk', 'play_action', params=dict(user_name="p2", action="block")) # rightful duke doing a righteous block
+    rc.modify_room('sk', 'play_action', params=dict(user_name="p1", action="allow"))
+    rc.modify_room('sk', 'play_action', params=dict(user_name="p3", action="allow"))
+    rc.modify_room('sk', 'play_action', params=dict(user_name="p4", action="allow"))
+    rc.modify_room('sk', 'play_action', params=dict(user_name="p2", action="foreign_aid"))
+    rc.modify_room('sk', 'play_action', params=dict(user_name="p1", action="block")) # another rightful duke doing a righteous challenge
+    rc.modify_room('sk', 'play_action', params=dict(user_name="p2", action="challenge")) # p2 makes an erroneous challenge
+    rc.modify_room('sk', 'play_action', params=dict(user_name="p1", action="reveal0")) # p1 prooves he is the duke
+    rc.modify_room('sk', 'play_action', params=dict(user_name="p2", action="discard0")) # gotta pay for your erroneous challenge
+    rc.modify_room('sk', 'play_action', params=dict(user_name="p3", action="foreign_aid"))
+    rc.modify_room('sk', 'play_action', params=dict(user_name="p1", action="block")) # p1 blocks but is no longer the duke
+    rc.modify_room('sk', 'play_action', params=dict(user_name="p3", action="challenge")) # p3 makes a correct accusation p1 will have to pay
+    rc.modify_room('sk', 'play_action', params=dict(user_name="p1", action="reveal1")) # p1 has to grave something
+    rc.modify_room('sk', 'play_action', params=dict(user_name="p4", action="tax"))
+    rc.modify_room('sk', 'play_action', params=dict(user_name="p1", action="stealp2"))
+    rc.modify_room('sk', 'play_action', params=dict(user_name="p2", action="stealp4"))
+    rc.modify_room('sk', 'play_action', params=dict(user_name="p3", action="stealp4"))
+    rc.modify_room('sk', 'play_action', params=dict(user_name="p4", action="tax"))
+    rc.modify_room('sk', 'play_action', params=dict(user_name="p2", action="block"))
+    rc.modify_room('sk', 'play_action', params=dict(user_name="p1", action="stealp4"))
+    rc.modify_room('sk', 'play_action', params=dict(user_name="p2", action="stealp4"))
+    rc.modify_room('sk', 'play_action', params=dict(user_name="p3", action="assassinatep4"))
+    rc.modify_room('sk', 'play_action', params=dict(user_name="p4", action="discard0"))
+    rc.modify_room('sk', 'play_action', params=dict(user_name="p4", action="income")) # this was added in late when a bug was fixed
+    rc.modify_room('sk', 'play_action', params=dict(user_name="p1", action="exchange"))
+    rc.modify_room('sk', 'play_action', params=dict(user_name="p1", action="doublediscard0_2"))
+    rc.modify_room('sk', 'play_action', params=dict(user_name="p2", action="income"))
+    rc.modify_room('sk', 'play_action', params=dict(user_name="p3", action="infectp1"))
+    rc.modify_room('sk', 'play_action', params=dict(user_name="p1", action="discard0"))
+    rc.modify_room('sk', 'play_action', params=dict(user_name="p4", action="income"))
+    rc.modify_room('sk', 'play_action', params=dict(user_name="p2", action="tax"))
+    rc.modify_room('sk', 'play_action', params=dict(user_name="p3", action="tax"))
+    rc.modify_room('sk', 'play_action', params=dict(user_name="p4", action="tax"))
+    rc.modify_room('sk', 'play_action', params=dict(user_name="p2", action="tax"))
+    rc.modify_room('sk', 'play_action', params=dict(user_name="p3", action="tax"))
+    rc.modify_room('sk', 'play_action', params=dict(user_name="p4", action="tax"))
+    rc.modify_room('sk', 'play_action', params=dict(user_name="p2", action="tax"))
+    rc.modify_room('sk', 'play_action', params=dict(user_name="p3", action="tax"))
+    rc.modify_room('sk', 'play_action', params=dict(user_name="p4", action="tax")) # lets test out what happens when you have 10 coins
+    rc.modify_room('sk', 'play_action', params=dict(user_name="p2", action="steamp3")) # he must infect
+    rc.modify_room('sk', 'play_action', params=dict(user_name="p2", action="tax")) # fails
+    rc.modify_room('sk', 'play_action', params=dict(user_name="p2", action="income")) # fails
+    rc.modify_room('sk', 'play_action', params=dict(user_name="p2", action="foreign_aid")) # fails
+    rc.modify_room('sk', 'play_action', params=dict(user_name="p2", action="assassinatep4")) # fails
+    rc.modify_room('sk', 'play_action', params=dict(user_name="p2", action="infectp3"))
+    rc.modify_room('sk', 'play_action', params=dict(user_name="p3", action="discard0"))
+
+    myquery = dict()
+    for item in rooms.find(myquery):
+        pp.pprint(item)
+
+
+    #x = mycoll.insert_one(dict(user_name='steve'))
+    #print(x.inserted_id)
+    #myquery = dict(user_name='steve')
+    #for item in mycoll.find(myquery):
+    #    print(item)
+    #print(myclient.list_database_names())
+    # game is one mongodb document and if two people access something at the same time their browser is just told to try again and it does
+    # mycoll.drop()
+    return jsonify(dict(hi=1))
+
+class RC:
+    def __init__(self, rooms):
+        self.rooms = rooms
+    def create_room(self, room_name, game_master, is_private=False, game_name=''):
+        if self.rooms.find({"room_name": room_name}).count() > 0:
             # If the room exists, join the room
-            return join_room(room_name, game_master)
+            return self.join_room(room_name, game_master)
         game_params = dict()
         if game_name == 'Spanish Flu':
             game_params["approval_timer"] = "disabled"
             # game_params["approval_timer"] = "infinite"
             game_params["keep_grave_sorted"] = True
-        return rooms.insert_one(dict(room_name=room_name,
+        return self.rooms.insert_one(dict(room_name=room_name,
             game_master=game_master,
             is_private=is_private,
             game_name=game_name,
@@ -38,13 +127,13 @@ def mongo():
             game_state='waiting',
             game_data=dict(),
             game_params=game_params))
-    def delete_room(room_name):
+    def delete_room(self, room_name):
         query={"room_name": room_name}
-        rooms.delete_many(query)
-    def join_room(room_name, user_name):
-        if rooms.find({"room_name": room_name}).count() == 0:
-            room = create_room(room_name, user_name)
-        room = rooms.find_one({"room_name": room_name})
+        self.rooms.delete_many(query)
+    def join_room(self, room_name, user_name):
+        if self.rooms.find({"room_name": room_name}).count() == 0:
+            room = self.create_room(room_name, user_name)
+        room = self.rooms.find_one({"room_name": room_name})
         myquery={"room_name": room_name}
         players = []
         if "players" in room:
@@ -52,34 +141,34 @@ def mongo():
         if user_name not in players:
             players.append(user_name)
             newvalues = {"$set": {"players": players}}
-            rooms.update_one(myquery, newvalues)
-    def modify_room(room_name, action, params=dict()):
+            self.rooms.update_one(myquery, newvalues)
+    def modify_room(self, room_name, action, params=dict()):
         query={"room_name": room_name}
         if action == 'waiting':
             query={"room_name": room_name}
             newvalues = {"$set": {"game_state": "waiting"}}
-            rooms.update_one(query, newvalues)
+            self.rooms.update_one(query, newvalues)
         elif action == 'started':
             query={"room_name": room_name, "game_state": "waiting",
                     "game_name": "Spanish Flu"}
-            room = rooms.find_one(query);
+            room = self.rooms.find_one(query);
             if room is not None:
                 newvalues = {"$set": {
                     "game_state": "started",
-                    "game_data": create_game(room)}
+                    "game_data": RC.create_game(room)}
                 }
-                rooms.update_one(query, newvalues)
+                self.rooms.update_one(query, newvalues)
         elif action == 'play_action':
             query={"room_name": room_name, "game_state": "started",
                     "game_name": "Spanish Flu"}
-            room = rooms.find_one(query);
+            room = self.rooms.find_one(query);
             if room is not None:
-                game_data = action_game(room, params) 
+                game_data = RC.action_game(room, params) 
                 if game_data is not None:
                     newvalues = {"$set": {
                         "game_data": game_data}
                     }
-                    rooms.update_one(query, newvalues)
+                    self.rooms.update_one(query, newvalues)
 
     def get_next_player_name(game_data, last_player):
         players = game_data["players"]
@@ -305,18 +394,18 @@ def mongo():
 
         # Add next actions game can wait for
         if action == 'income':
-            next_player = get_next_player_name(room["game_data"], user_name)
+            next_player = RC.get_next_player_name(room["game_data"], user_name)
             room["game_data"]["waiting_for"].append(dict(kind='turn', user_name=next_player))
         elif action == 'foreign_aid':
             if room["game_params"]["approval_timer"] == "disabled":
-                next_player = get_next_player_name(room["game_data"], user_name)
+                next_player = RC.get_next_player_name(room["game_data"], user_name)
                 room["game_data"]["waiting_for"].append(dict(kind='turn', user_name=next_player))
             for item in room["game_data"]["players"]:
                 if item["user_name"] != user_name:
                     room["game_data"]["waiting_for"].append(dict(kind='block', user_name=item["user_name"]))
         elif action == "tax" or action.startswith("steal"):
             if room["game_params"]["approval_timer"] == "disabled":
-                next_player = get_next_player_name(room["game_data"], user_name)
+                next_player = RC.get_next_player_name(room["game_data"], user_name)
                 room["game_data"]["waiting_for"].append(dict(kind='turn', user_name=next_player))
             for item in room["game_data"]["players"]:
                 if item["user_name"] != user_name:
@@ -327,7 +416,7 @@ def mongo():
         elif action == "allow" and len(room["game_data"]["waiting_for"]) == 0:
             for item in reversed(room["game_data"]["action_log"]):
                 if item["action"] in ["income", "foreign_aid", "tax", "exchange"] or item["action"].startswith("steal") or item["action"].startswith("assassinate") or item["action"].startswith("infect"):
-                    next_player = get_next_player_name(room["game_data"], item["user_name"])
+                    next_player = RC.get_next_player_name(room["game_data"], item["user_name"])
                     break
             room["game_data"]["waiting_for"].append(dict(kind='turn', user_name=next_player))
         elif action.startswith('assassinate'):
@@ -342,7 +431,7 @@ def mongo():
             room["game_data"]["waiting_for"].append(dict(kind='doublediscard', user_name=user_name))
         elif action.startswith("doublediscard"):
             if room["game_params"]["approval_timer"] == "disabled":
-                next_player = get_next_player_name(room["game_data"], user_name)
+                next_player = RC.get_next_player_name(room["game_data"], user_name)
                 room["game_data"]["waiting_for"].append(dict(kind='turn', user_name=next_player))
             for item in room["game_data"]["players"]:
                 if item["user_name"] != user_name:
@@ -357,7 +446,7 @@ def mongo():
             if room["game_params"]["approval_timer"] == "disabled":
                 for item in reversed(room["game_data"]["action_log"]):
                     if item["action"] in ["income", "foreign_aid", "tax", "exchange"] or item["action"].startswith("steal") or item["action"].startswith("assassinate") or item["action"].startswith("infect"):
-                        next_player = get_next_player_name(room["game_data"], item["user_name"])
+                        next_player = RC.get_next_player_name(room["game_data"], item["user_name"])
                         break
                 room["game_data"]["waiting_for"].append(dict(kind='turn', user_name=next_player))
             for item in room["game_data"]["players"]:
@@ -381,107 +470,19 @@ def mongo():
                 # Challenge is over - the pretender was caught lets move the game along to the next turn
                 for item in reversed(room["game_data"]["action_log"]):
                     if item["action"] in ["income", "foreign_aid", "tax", "exchange"] or item["action"].startswith("steal") or item["action"].startswith("assassinate") or item["action"].startswith("infect"):
-                        next_player = get_next_player_name(room["game_data"], item["user_name"])
+                        next_player = RC.get_next_player_name(room["game_data"], item["user_name"])
                         break
                 room["game_data"]["waiting_for"].append(dict(kind='turn', user_name=next_player))
         elif action.startswith("discard"):
             # Challenge is over - the false accuser was punished lets move the game along
             for item in reversed(room["game_data"]["action_log"]):
                 if item["action"] in ["income", "foreign_aid", "tax", "exchange"] or item["action"].startswith("steal") or item["action"].startswith("assassinate") or item["action"].startswith("infect"):
-                    next_player = get_next_player_name(room["game_data"], item["user_name"])
+                    next_player = RC.get_next_player_name(room["game_data"], item["user_name"])
                     break
             room["game_data"]["waiting_for"].append(dict(kind='turn', user_name=next_player))
 
 
         return room["game_data"]
-
-
-
-
-    import pprint
-    pp = pprint.PrettyPrinter(indent=4)
-    create_room('sk', 'p1', True, 'Spanish Flu')
-    join_room('sk', 'p2')
-    join_room('sk', 'p3')
-    join_room('sk', 'p4')
-    modify_room('sk', 'started')
-    action_params = dict()
-    action_params["user_name"] = "p2"
-    action_params["action"] = "income"
-    modify_room('sk', 'play_action', action_params) # fail cuz not his turn
-    action_params = dict()
-    action_params["user_name"] = "p3"
-    action_params["action"] = "income"
-    modify_room('sk', 'play_action', action_params)
-    action_params = dict()
-    action_params["user_name"] = "p4"
-    action_params["action"] = "foreign_aid"
-    modify_room('sk', 'play_action', action_params)
-    modify_room('sk', 'play_action', params=dict(user_name="p1", action="allow"))
-    modify_room('sk', 'play_action', params=dict(user_name="p2", action="allow"))
-    modify_room('sk', 'play_action', params=dict(user_name="p3", action="allow"))
-    modify_room('sk', 'play_action', params=dict(user_name="p1", action="foreign_aid"))
-    modify_room('sk', 'play_action', params=dict(user_name="p2", action="block")) # rightful duke doing a righteous block
-    modify_room('sk', 'play_action', params=dict(user_name="p1", action="allow"))
-    modify_room('sk', 'play_action', params=dict(user_name="p3", action="allow"))
-    modify_room('sk', 'play_action', params=dict(user_name="p4", action="allow"))
-    modify_room('sk', 'play_action', params=dict(user_name="p2", action="foreign_aid"))
-    modify_room('sk', 'play_action', params=dict(user_name="p1", action="block")) # another rightful duke doing a righteous challenge
-    modify_room('sk', 'play_action', params=dict(user_name="p2", action="challenge")) # p2 makes an erroneous challenge
-    modify_room('sk', 'play_action', params=dict(user_name="p1", action="reveal0")) # p1 prooves he is the duke
-    modify_room('sk', 'play_action', params=dict(user_name="p2", action="discard0")) # gotta pay for your erroneous challenge
-    modify_room('sk', 'play_action', params=dict(user_name="p3", action="foreign_aid"))
-    modify_room('sk', 'play_action', params=dict(user_name="p1", action="block")) # p1 blocks but is no longer the duke
-    modify_room('sk', 'play_action', params=dict(user_name="p3", action="challenge")) # p3 makes a correct accusation p1 will have to pay
-    modify_room('sk', 'play_action', params=dict(user_name="p1", action="reveal1")) # p1 has to grave something
-    modify_room('sk', 'play_action', params=dict(user_name="p4", action="tax"))
-    modify_room('sk', 'play_action', params=dict(user_name="p1", action="stealp2"))
-    modify_room('sk', 'play_action', params=dict(user_name="p2", action="stealp4"))
-    modify_room('sk', 'play_action', params=dict(user_name="p3", action="stealp4"))
-    modify_room('sk', 'play_action', params=dict(user_name="p4", action="tax"))
-    modify_room('sk', 'play_action', params=dict(user_name="p2", action="block"))
-    modify_room('sk', 'play_action', params=dict(user_name="p1", action="stealp4"))
-    modify_room('sk', 'play_action', params=dict(user_name="p2", action="stealp4"))
-    modify_room('sk', 'play_action', params=dict(user_name="p3", action="assassinatep4"))
-    modify_room('sk', 'play_action', params=dict(user_name="p4", action="discard0"))
-    modify_room('sk', 'play_action', params=dict(user_name="p4", action="income")) # this was added in late when a bug was fixed
-    modify_room('sk', 'play_action', params=dict(user_name="p1", action="exchange"))
-    modify_room('sk', 'play_action', params=dict(user_name="p1", action="doublediscard0_2"))
-    modify_room('sk', 'play_action', params=dict(user_name="p2", action="income"))
-    modify_room('sk', 'play_action', params=dict(user_name="p3", action="infectp1"))
-    modify_room('sk', 'play_action', params=dict(user_name="p1", action="discard0"))
-    modify_room('sk', 'play_action', params=dict(user_name="p4", action="income"))
-    modify_room('sk', 'play_action', params=dict(user_name="p2", action="tax"))
-    modify_room('sk', 'play_action', params=dict(user_name="p3", action="tax"))
-    modify_room('sk', 'play_action', params=dict(user_name="p4", action="tax"))
-    modify_room('sk', 'play_action', params=dict(user_name="p2", action="tax"))
-    modify_room('sk', 'play_action', params=dict(user_name="p3", action="tax"))
-    modify_room('sk', 'play_action', params=dict(user_name="p4", action="tax"))
-    modify_room('sk', 'play_action', params=dict(user_name="p2", action="tax"))
-    modify_room('sk', 'play_action', params=dict(user_name="p3", action="tax"))
-    modify_room('sk', 'play_action', params=dict(user_name="p4", action="tax")) # lets test out what happens when you have 10 coins
-    modify_room('sk', 'play_action', params=dict(user_name="p2", action="steamp3")) # he must infect
-    modify_room('sk', 'play_action', params=dict(user_name="p2", action="tax")) # fails
-    modify_room('sk', 'play_action', params=dict(user_name="p2", action="income")) # fails
-    modify_room('sk', 'play_action', params=dict(user_name="p2", action="foreign_aid")) # fails
-    modify_room('sk', 'play_action', params=dict(user_name="p2", action="assassinatep4")) # fails
-    modify_room('sk', 'play_action', params=dict(user_name="p2", action="infectp3"))
-    modify_room('sk', 'play_action', params=dict(user_name="p3", action="discard0"))
-
-    myquery = dict()
-    for item in rooms.find(myquery):
-        pp.pprint(item)
-
-
-    #x = mycoll.insert_one(dict(user_name='steve'))
-    #print(x.inserted_id)
-    #myquery = dict(user_name='steve')
-    #for item in mycoll.find(myquery):
-    #    print(item)
-    #print(myclient.list_database_names())
-    # game is one mongodb document and if two people access something at the same time their browser is just told to try again and it does
-    # mycoll.drop()
-    return jsonify(dict(hi=1))
 
 @socketio.on('load play page')
 def load_play_page(json):
@@ -494,8 +495,6 @@ def play_action(json):
     print('rx msg '  + str(json))
     emit('update', get_game_state(json["user_name"], json["room_name"], to_jsonify=False), room=json["room_name"])
     # modify_room('sk', 'play_action', params=dict(user_name="p2", action="tax"))
-
-
 
 
 @app.route('/get_game_state/<user_name>/<room_name>')
