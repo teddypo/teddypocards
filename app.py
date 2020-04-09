@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 
 from flask import Flask, render_template, redirect, url_for, request, escape, jsonify
+from flask_socketio import SocketIO, join_room, leave_room, send, emit
 app = Flask(__name__, instance_relative_config=True)
 app.config.from_pyfile('config.py')
+socketio = SocketIO(app)
 import json
 import random
 import copy
@@ -481,6 +483,21 @@ def mongo():
     # mycoll.drop()
     return jsonify(dict(hi=1))
 
+@socketio.on('load play page')
+def load_play_page(json):
+    print('rx msg '  + str(json))
+    join_room(json['room_name']) # this is a socketio function that i happen to have a name collision with
+    emit('update', get_game_state(json["user_name"], json["room_name"], to_jsonify=False))
+
+@socketio.on('play action')
+def play_action(json):
+    print('rx msg '  + str(json))
+    emit('update', get_game_state(json["user_name"], json["room_name"], to_jsonify=False), room=json["room_name"])
+    # modify_room('sk', 'play_action', params=dict(user_name="p2", action="tax"))
+
+
+
+
 @app.route('/get_game_state/<user_name>/<room_name>')
 def get_game_state(user_name, room_name, to_jsonify=True):
     myclient = pymongo.MongoClient(app.config["MONGOSTRING"])
@@ -825,7 +842,8 @@ def join():
 def main():
     global db_prefix
     db_prefix = ''
-    app.run(host='0.0.0.0', debug=True)
+    # app.run(host='0.0.0.0', debug=True)
+    socketio.run(app)
 
 if __name__ == "__main__":
     main()
