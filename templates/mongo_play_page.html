@@ -52,7 +52,7 @@
 	  </ul>
 	</div>
 	</div>
-{% if user_name != whose_turn %}
+{% if not dict(user_name=user_name, kind='turn') in waiting_for %}
 {% set dis_str = "disabled" %}
 {% else %}
 {% set dis_str = "" %}
