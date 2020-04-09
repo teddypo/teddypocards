@@ -128,6 +128,9 @@ def mongo():
             elif action == "foreign_aid" and item["kind"] == "turn" and item["user_name"] == user_name:
                 room["game_data"]["waiting_for"] = []
                 allowed = True
+            elif action == "allow" and item["kind"] == "block" and item["user_name"] == user_name:
+                room["game_data"]["waiting_for"].remove(dict(kind="block", user_name=user_name))
+                allowed = True
         if not allowed:
             return None
 
@@ -135,7 +138,8 @@ def mongo():
         room["game_data"]["action_log"].append(params)
 
         # Backup the game state (for potential blocks)
-        room["game_data"]["prev_players"] = copy.deepcopy(room["game_data"]["players"])
+        if action != "allow":
+            room["game_data"]["prev_players"] = copy.deepcopy(room["game_data"]["players"])
 
         # Modify cards and coins with the turn actions
         players = room["game_data"]["players"]
@@ -156,6 +160,14 @@ def mongo():
             for item in room["game_data"]["players"]:
                 if item["user_name"] != user_name:
                     room["game_data"]["waiting_for"].append(dict(kind='block', user_name=item["user_name"]))
+        elif action == "allow" and len(room["game_data"]["waiting_for"]) == 0:
+            next_player = 'ssss'
+            for item in reversed(room["game_data"]["action_log"]):
+                if item["action"] in ["income", "foreign_aid", "tax", "steal", "assassin", "exchange", "coup"]:
+                    next_player = get_next_player_name(room["game_data"], item["user_name"])
+                    break
+            room["game_data"]["waiting_for"].append(dict(kind='turn', user_name=next_player))
+
 
 
         return room["game_data"]
@@ -180,6 +192,9 @@ def mongo():
     action_params["user_name"] = "p4"
     action_params["action"] = "foreign_aid"
     modify_room('sk', 'play_action', action_params)
+    modify_room('sk', 'play_action', params=dict(user_name="p1", action="allow"))
+    modify_room('sk', 'play_action', params=dict(user_name="p2", action="allow"))
+    modify_room('sk', 'play_action', params=dict(user_name="p3", action="allow"))
     myquery = dict()
     import pprint
     pp = pprint.PrettyPrinter(indent=4)
