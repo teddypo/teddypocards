@@ -134,6 +134,9 @@ def mongo():
             elif action.startswith("steal") and item["kind"] == "turn" and item["user_name"] == user_name:
                 room["game_data"]["waiting_for"] = []
                 allowed = True
+            elif action.startswith("assassinate") and item["kind"] == "turn" and item["user_name"] == user_name:
+                room["game_data"]["waiting_for"] = []
+                allowed = True
             elif action == "allow" and item["kind"] == "block" and item["user_name"] == user_name:
                 room["game_data"]["waiting_for"].remove(dict(kind="block", user_name=user_name))
                 allowed = True
@@ -293,6 +296,14 @@ def mongo():
                     next_player = get_next_player_name(room["game_data"], item["user_name"])
                     break
             room["game_data"]["waiting_for"].append(dict(kind='turn', user_name=next_player))
+        elif action.startswith('assassinate'):
+            room["game_data"]["waiting_for"].append(dict(kind='discard', user_name=action.replace("assassinate", "")))
+            for item in room["game_data"]["players"]:
+                if item["user_name"] != user_name:
+                    room["game_data"]["waiting_for"].append(dict(kind='block', user_name=item["user_name"]))
+            for item in room["game_data"]["players"]:
+                if item["user_name"] != user_name:
+                    room["game_data"]["waiting_for"].append(dict(kind='challenge', user_name=item["user_name"]))
         elif action == "block":
             if room["game_params"]["approval_timer"] == "disabled":
                 for item in reversed(room["game_data"]["action_log"]):
@@ -382,6 +393,8 @@ def mongo():
     modify_room('sk', 'play_action', params=dict(user_name="p2", action="block"))
     modify_room('sk', 'play_action', params=dict(user_name="p1", action="stealp4"))
     modify_room('sk', 'play_action', params=dict(user_name="p2", action="stealp4"))
+    modify_room('sk', 'play_action', params=dict(user_name="p3", action="assassinatep4"))
+    modify_room('sk', 'play_action', params=dict(user_name="p4", action="discard0"))
     myquery = dict()
     for item in rooms.find(myquery):
         pp.pprint(item)
