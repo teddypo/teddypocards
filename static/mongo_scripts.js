@@ -12,11 +12,24 @@ $(document).ready(function(){
     socket.on('update', function() {
         console.log('update rxed')
     });
-    $('#takeincome').on('click', function(e){
-        socket.emit('play action', {
-                action: 'income',
-                user_name: user_name,
-                room_name: room_name
-        })
+    $('.turn_button').on('click', function(e){
+        action = $(e.target).data('action')
+        if (action.length > 0){
+            socket.emit('play action', {
+                    action: action,
+                    user_name: user_name,
+                    room_name: room_name
+            })
+        }
+    });
+    $('.aux_button').on('click', function(e){
+        action = $(e.target).data('action')
+        if (action.length > 0){
+            socket.emit('play action', {
+                    action: action,
+                    user_name: user_name,
+                    room_name: room_name
+            })
+        }
     });
 });

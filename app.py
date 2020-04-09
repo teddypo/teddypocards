@@ -143,11 +143,13 @@ class RC:
             newvalues = {"$set": {"players": players}}
             self.rooms.update_one(myquery, newvalues)
     def modify_room(self, room_name, action, params=dict()):
+        changed = False
         query={"room_name": room_name}
         if action == 'waiting':
             query={"room_name": room_name}
             newvalues = {"$set": {"game_state": "waiting"}}
             self.rooms.update_one(query, newvalues)
+            changed = True
         elif action == 'started':
             query={"room_name": room_name, "game_state": "waiting",
                     "game_name": "Spanish Flu"}
@@ -158,6 +160,7 @@ class RC:
                     "game_data": RC.create_game(room)}
                 }
                 self.rooms.update_one(query, newvalues)
+                changed=True
         elif action == 'play_action':
             query={"room_name": room_name, "game_state": "started",
                     "game_name": "Spanish Flu"}
@@ -169,6 +172,8 @@ class RC:
                         "game_data": game_data}
                     }
                     self.rooms.update_one(query, newvalues)
+                    changed = True
+        return changed
 
     def get_next_player_name(game_data, last_player):
         players = game_data["players"]
@@ -493,8 +498,12 @@ def load_play_page(json):
 @socketio.on('play action')
 def play_action(json):
     print('rx msg '  + str(json))
-    emit('update', get_game_state(json["user_name"], json["room_name"], to_jsonify=False), room=json["room_name"])
-    # modify_room('sk', 'play_action', params=dict(user_name="p2", action="tax"))
+    rooms = mydb["room"]
+    rc = RC(rooms)
+    if "room_name" in json and "user_name"  in json and "action" in json:
+        truth = rc.modify_room(json["room_name"], 'play_action', params=dict(user_name=json["user_name"], action=json["action"]))
+        print (truth)
+        emit('update', get_game_state(json["user_name"], json["room_name"], to_jsonify=False), room=json["room_name"])
 
 
 @app.route('/get_game_state/<user_name>/<room_name>')
