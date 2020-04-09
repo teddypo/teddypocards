@@ -504,6 +504,7 @@ def mongo_play_page(user_name, room_name):
     kwargs = dict(user_name=user_name,
             room_name=room_name,
             activity_log=[],
+            waiting_for = [],
             alternate_js=True)
     return render_template('mongo_play_page.html', **kwargs)
 

@@ -48,6 +48,12 @@
 	  <ul class="list-group">
 		  <li class="list-group-item">Deck: {{deck_size}} cards</li>
 	  </ul>
+	  <ul class="list-group">
+		<li class="list-group-item">Waiting For</li>
+		{% for item  in waiting_for %}
+        <li class="list-group-item">{{item.user_name}} {{item.kind}}</li>
+		{% endfor %}
+	  </ul>
 	</div>
 	</div>
 {% if user_name != whose_turn %}
