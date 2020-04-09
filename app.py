@@ -270,13 +270,23 @@ def mongo():
         if action == 'income':
             next_player = get_next_player_name(room["game_data"], user_name)
             room["game_data"]["waiting_for"].append(dict(kind='turn', user_name=next_player))
-        elif action == 'foreign_aid' or action == "tax" or action.startswith("steal"):
+        elif action == 'foreign_aid':
             if room["game_params"]["approval_timer"] == "disabled":
                 next_player = get_next_player_name(room["game_data"], user_name)
                 room["game_data"]["waiting_for"].append(dict(kind='turn', user_name=next_player))
             for item in room["game_data"]["players"]:
                 if item["user_name"] != user_name:
                     room["game_data"]["waiting_for"].append(dict(kind='block', user_name=item["user_name"]))
+        elif action == "tax" or action.startswith("steal"):
+            if room["game_params"]["approval_timer"] == "disabled":
+                next_player = get_next_player_name(room["game_data"], user_name)
+                room["game_data"]["waiting_for"].append(dict(kind='turn', user_name=next_player))
+            for item in room["game_data"]["players"]:
+                if item["user_name"] != user_name:
+                    room["game_data"]["waiting_for"].append(dict(kind='block', user_name=item["user_name"]))
+            for item in room["game_data"]["players"]:
+                if item["user_name"] != user_name:
+                    room["game_data"]["waiting_for"].append(dict(kind='challenge', user_name=item["user_name"]))
         elif action == "allow" and len(room["game_data"]["waiting_for"]) == 0:
             for item in reversed(room["game_data"]["action_log"]):
                 if item["action"] in ["income", "foreign_aid", "tax", "steal", "assassin", "exchange", "coup"]:
