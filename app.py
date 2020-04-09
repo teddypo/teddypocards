@@ -131,6 +131,9 @@ def mongo():
             elif action == "allow" and item["kind"] == "block" and item["user_name"] == user_name:
                 room["game_data"]["waiting_for"].remove(dict(kind="block", user_name=user_name))
                 allowed = True
+            elif action == "block" and item["kind"] == "block" and item["user_name"] == user_name:
+                room["game_data"]["waiting_for"] = []
+                allowed = True
         if not allowed:
             return None
 
@@ -139,6 +142,10 @@ def mongo():
 
         # Backup the game state (for potential blocks)
         if action != "allow":
+            # harmless for income to do a backup
+            # required for foreign aid to do a backup
+            # required for a block to do a backup
+            temp_backup = copy.deepcopy(room["game_data"]["prev_players"])
             room["game_data"]["prev_players"] = copy.deepcopy(room["game_data"]["players"])
 
         # Modify cards and coins with the turn actions
@@ -146,10 +153,12 @@ def mongo():
         for item in players:
             if action == "income" and item["user_name"] == user_name:
                 item["coins"] += 1
-            if action == "foreign_aid" and item["user_name"] == user_name:
+            elif action == "foreign_aid" and item["user_name"] == user_name:
                 item["coins"] += 2
+            elif action == "block" and item["user_name"] == user_name:
+                room["game_data"]["players"] = temp_backup
 
-        # Add next actions people game can wait for
+        # Add next actions game can wait for
         if action == 'income':
             next_player = get_next_player_name(room["game_data"], user_name)
             room["game_data"]["waiting_for"].append(dict(kind='turn', user_name=next_player))
@@ -161,13 +170,21 @@ def mongo():
                 if item["user_name"] != user_name:
                     room["game_data"]["waiting_for"].append(dict(kind='block', user_name=item["user_name"]))
         elif action == "allow" and len(room["game_data"]["waiting_for"]) == 0:
-            next_player = 'ssss'
             for item in reversed(room["game_data"]["action_log"]):
                 if item["action"] in ["income", "foreign_aid", "tax", "steal", "assassin", "exchange", "coup"]:
                     next_player = get_next_player_name(room["game_data"], item["user_name"])
                     break
             room["game_data"]["waiting_for"].append(dict(kind='turn', user_name=next_player))
-
+        elif action == "block":
+            if room["game_params"]["approval_timer"] == "disabled":
+                for item in reversed(room["game_data"]["action_log"]):
+                    if item["action"] in ["income", "foreign_aid", "tax", "steal", "assassin", "exchange", "coup"]:
+                        next_player = get_next_player_name(room["game_data"], item["user_name"])
+                        break
+                room["game_data"]["waiting_for"].append(dict(kind='turn', user_name=next_player))
+            for item in room["game_data"]["players"]:
+                if item["user_name"] != user_name:
+                    room["game_data"]["waiting_for"].append(dict(kind='challenge', user_name=item["user_name"]))
 
 
         return room["game_data"]
@@ -195,6 +212,8 @@ def mongo():
     modify_room('sk', 'play_action', params=dict(user_name="p1", action="allow"))
     modify_room('sk', 'play_action', params=dict(user_name="p2", action="allow"))
     modify_room('sk', 'play_action', params=dict(user_name="p3", action="allow"))
+    modify_room('sk', 'play_action', params=dict(user_name="p1", action="foreign_aid"))
+    modify_room('sk', 'play_action', params=dict(user_name="p2", action="block")) # rightful duke doing a righteous block
     myquery = dict()
     import pprint
     pp = pprint.PrettyPrinter(indent=4)
