@@ -128,6 +128,9 @@ def mongo():
             elif action == "foreign_aid" and item["kind"] == "turn" and item["user_name"] == user_name:
                 room["game_data"]["waiting_for"] = []
                 allowed = True
+            elif action == "tax" and item["kind"] == "turn" and item["user_name"] == user_name:
+                room["game_data"]["waiting_for"] = []
+                allowed = True
             elif action == "allow" and item["kind"] == "block" and item["user_name"] == user_name:
                 room["game_data"]["waiting_for"].remove(dict(kind="block", user_name=user_name))
                 allowed = True
@@ -182,6 +185,8 @@ def mongo():
                 item["coins"] += 1
             elif action == "foreign_aid" and item["user_name"] == user_name:
                 item["coins"] += 2
+            elif action == "tax" and item["user_name"] == user_name:
+                item["coins"] += 3
             elif action.startswith('discard') and item["user_name"] == user_name:
                 discard_index = int(action.replace("discard", ""))
                 for player in room["game_data"]["players"]:
@@ -349,6 +354,7 @@ def mongo():
     modify_room('sk', 'play_action', params=dict(user_name="p1", action="block")) # p1 blocks but is no longer the duke
     modify_room('sk', 'play_action', params=dict(user_name="p3", action="challenge")) # p3 makes a correct accusation p1 will have to pay
     modify_room('sk', 'play_action', params=dict(user_name="p1", action="reveal1")) # p1 has to grave something
+    modify_room('sk', 'play_action', params=dict(user_name="p4", action="tax"))
     myquery = dict()
     for item in rooms.find(myquery):
         pp.pprint(item)
