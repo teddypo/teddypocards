@@ -24,7 +24,7 @@ def mongo():
             # If the room exists, join the room
             return join_room(room_name, game_master)
         game_params = dict()
-        if game_name == 'Overthrown':
+        if game_name == 'Spanish Flu':
             game_params["approval_timer"] = "disabled"
             # game_params["approval_timer"] = "infinite"
             game_params["keep_grave_sorted"] = True
@@ -59,7 +59,7 @@ def mongo():
             rooms.update_one(query, newvalues)
         elif action == 'started':
             query={"room_name": room_name, "game_state": "waiting",
-                    "game_name": "Overthrown"}
+                    "game_name": "Spanish Flu"}
             room = rooms.find_one(query);
             if room is not None:
                 newvalues = {"$set": {
@@ -69,7 +69,7 @@ def mongo():
                 rooms.update_one(query, newvalues)
         elif action == 'play_action':
             query={"room_name": room_name, "game_state": "started",
-                    "game_name": "Overthrown"}
+                    "game_name": "Spanish Flu"}
             room = rooms.find_one(query);
             if room is not None:
                 game_data = action_game(room, params) 
@@ -149,7 +149,7 @@ def mongo():
             elif action.startswith("doublediscard") and item["kind"] == "doublediscard" and item["user_name"] == user_name:
                 room["game_data"]["waiting_for"] = []
                 allowed = True
-            elif action.startswith("coup") and item["kind"] == "turn" and item["user_name"] == user_name:
+            elif action.startswith("infect") and item["kind"] == "turn" and item["user_name"] == user_name:
                 if coins >= 7:
                     room["game_data"]["waiting_for"] = []
                     allowed=True
@@ -223,7 +223,7 @@ def mongo():
                 # do sorting then back to front for indexing issues
                 room["game_data"]["grave_yard"].append(item["cards"].pop(idxes[1]))
                 room["game_data"]["grave_yard"].append(item["cards"].pop(idxes[0]))
-            elif action.startswith('coup') and item["user_name"] == user_name:
+            elif action.startswith('infect') and item["user_name"] == user_name:
                 item["coins"] -= 7
             elif action.startswith('discard') and item["user_name"] == user_name:
                 discard_index = int(action.replace("discard", ""))
@@ -324,7 +324,7 @@ def mongo():
                     room["game_data"]["waiting_for"].append(dict(kind='challenge', user_name=item["user_name"]))
         elif action == "allow" and len(room["game_data"]["waiting_for"]) == 0:
             for item in reversed(room["game_data"]["action_log"]):
-                if item["action"] in ["income", "foreign_aid", "tax", "exchange"] or item["action"].startswith("steal") or item["action"].startswith("assassinate") or item["action"].startswith("coup"):
+                if item["action"] in ["income", "foreign_aid", "tax", "exchange"] or item["action"].startswith("steal") or item["action"].startswith("assassinate") or item["action"].startswith("infect"):
                     next_player = get_next_player_name(room["game_data"], item["user_name"])
                     break
             room["game_data"]["waiting_for"].append(dict(kind='turn', user_name=next_player))
@@ -348,13 +348,13 @@ def mongo():
             for item in room["game_data"]["players"]:
                 if item["user_name"] != user_name:
                     room["game_data"]["waiting_for"].append(dict(kind='challenge', user_name=item["user_name"]))
-        elif action.startswith('coup'):
-            victim = action.replace('coup', '')
+        elif action.startswith('infect'):
+            victim = action.replace('infect', '')
             room["game_data"]["waiting_for"].append(dict(kind='discard', user_name=victim))
         elif action == "block":
             if room["game_params"]["approval_timer"] == "disabled":
                 for item in reversed(room["game_data"]["action_log"]):
-                    if item["action"] in ["income", "foreign_aid", "tax", "exchange"] or item["action"].startswith("steal") or item["action"].startswith("assassinate") or item["action"].startswith("coup"):
+                    if item["action"] in ["income", "foreign_aid", "tax", "exchange"] or item["action"].startswith("steal") or item["action"].startswith("assassinate") or item["action"].startswith("infect"):
                         next_player = get_next_player_name(room["game_data"], item["user_name"])
                         break
                 room["game_data"]["waiting_for"].append(dict(kind='turn', user_name=next_player))
@@ -363,7 +363,7 @@ def mongo():
                     room["game_data"]["waiting_for"].append(dict(kind='challenge', user_name=item["user_name"]))
         elif action == "challenge":
             for item in reversed(room["game_data"]["action_log"]):
-                if item["action"] in ["income", "foreign_aid", "tax", "exchange", "block"] or item["action"].startswith("steal") or item["action"].startswith("assassinate") or item["action"].startswith("coup"):
+                if item["action"] in ["income", "foreign_aid", "tax", "exchange", "block"] or item["action"].startswith("steal") or item["action"].startswith("assassinate") or item["action"].startswith("infect"):
                     challenged_user = item["user_name"]
                     break
             room["game_data"]["waiting_for"].append(dict(kind='reveal', user_name=challenged_user))
@@ -378,14 +378,14 @@ def mongo():
             else:
                 # Challenge is over - the pretender was caught lets move the game along to the next turn
                 for item in reversed(room["game_data"]["action_log"]):
-                    if item["action"] in ["income", "foreign_aid", "tax", "exchange"] or item["action"].startswith("steal") or item["action"].startswith("assassinate") or item["action"].startswith("coup"):
+                    if item["action"] in ["income", "foreign_aid", "tax", "exchange"] or item["action"].startswith("steal") or item["action"].startswith("assassinate") or item["action"].startswith("infect"):
                         next_player = get_next_player_name(room["game_data"], item["user_name"])
                         break
                 room["game_data"]["waiting_for"].append(dict(kind='turn', user_name=next_player))
         elif action.startswith("discard"):
             # Challenge is over - the false accuser was punished lets move the game along
             for item in reversed(room["game_data"]["action_log"]):
-                if item["action"] in ["income", "foreign_aid", "tax", "exchange"] or item["action"].startswith("steal") or item["action"].startswith("assassinate") or item["action"].startswith("coup"):
+                if item["action"] in ["income", "foreign_aid", "tax", "exchange"] or item["action"].startswith("steal") or item["action"].startswith("assassinate") or item["action"].startswith("infect"):
                     next_player = get_next_player_name(room["game_data"], item["user_name"])
                     break
             room["game_data"]["waiting_for"].append(dict(kind='turn', user_name=next_player))
@@ -398,7 +398,7 @@ def mongo():
 
     import pprint
     pp = pprint.PrettyPrinter(indent=4)
-    create_room('sk', 'p1', True, 'Overthrown')
+    create_room('sk', 'p1', True, 'Spanish Flu')
     join_room('sk', 'p2')
     join_room('sk', 'p3')
     join_room('sk', 'p4')
@@ -446,7 +446,7 @@ def mongo():
     modify_room('sk', 'play_action', params=dict(user_name="p1", action="exchange"))
     modify_room('sk', 'play_action', params=dict(user_name="p1", action="doublediscard0_2"))
     modify_room('sk', 'play_action', params=dict(user_name="p2", action="income"))
-    modify_room('sk', 'play_action', params=dict(user_name="p3", action="coupp1"))
+    modify_room('sk', 'play_action', params=dict(user_name="p3", action="infectp1"))
     modify_room('sk', 'play_action', params=dict(user_name="p1", action="discard0"))
     modify_room('sk', 'play_action', params=dict(user_name="p4", action="income"))
     modify_room('sk', 'play_action', params=dict(user_name="p2", action="tax"))
@@ -458,12 +458,12 @@ def mongo():
     modify_room('sk', 'play_action', params=dict(user_name="p2", action="tax"))
     modify_room('sk', 'play_action', params=dict(user_name="p3", action="tax"))
     modify_room('sk', 'play_action', params=dict(user_name="p4", action="tax")) # lets test out what happens when you have 10 coins
-    modify_room('sk', 'play_action', params=dict(user_name="p2", action="steamp3")) # he must coup
+    modify_room('sk', 'play_action', params=dict(user_name="p2", action="steamp3")) # he must infect
     modify_room('sk', 'play_action', params=dict(user_name="p2", action="tax")) # fails
     modify_room('sk', 'play_action', params=dict(user_name="p2", action="income")) # fails
     modify_room('sk', 'play_action', params=dict(user_name="p2", action="foreign_aid")) # fails
     modify_room('sk', 'play_action', params=dict(user_name="p2", action="assassinatep4")) # fails
-    modify_room('sk', 'play_action', params=dict(user_name="p2", action="coupp3"))
+    modify_room('sk', 'play_action', params=dict(user_name="p2", action="infectp3"))
     modify_room('sk', 'play_action', params=dict(user_name="p3", action="discard0"))
 
     myquery = dict()
@@ -709,7 +709,7 @@ def join_page():
     return render_template("join_page.html", public_rooms=public_rooms)
 @app.route('/create_page')
 def create_page():
-    game_names = ["Overthrown"]
+    game_names = ["Spanish Flu"]
     return render_template("create_page.html", game_names=game_names)
 @app.route('/create', methods=["GET", "POST"])
 def create():
@@ -725,7 +725,7 @@ def create():
         room_name = 'room'+str(uuid.uuid4().hex)[0:8]
     is_private = escape(request.form.get('is_private', ''))
     game_name = escape(request.form.get('game_name', ''))
-    if game_name == "Overthrown":
+    if game_name == "Spanish Flu":
         with open(db_prefix+'state_base.json', "r") as statef:
             game_data = json.load(statef)
         game_init = copy.deepcopy(game_data)
