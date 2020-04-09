@@ -137,6 +137,10 @@ def mongo():
             elif action == "block" and item["kind"] == "block" and item["user_name"] == user_name:
                 room["game_data"]["waiting_for"] = []
                 allowed = True
+            elif action == "challenge" and item["kind"] == "challenge" and item["user_name"] == user_name:
+                room["game_data"]["waiting_for"] = []
+                allowed = True
+                # At the bottom i'll need to add what happens next which is challenge response reveal
         if not allowed:
             return None
 
@@ -144,7 +148,8 @@ def mongo():
         room["game_data"]["action_log"].append(params)
 
         # Backup the game state (for potential blocks)
-        if action != "allow":
+        if action != "allow" and action != "challenge":
+            # action and challenge dont change game state and shouldnt blow away valuable saved backup
             # harmless for income to do a backup
             # required for foreign aid to do a backup
             # required for a block to do a backup
@@ -188,6 +193,12 @@ def mongo():
             for item in room["game_data"]["players"]:
                 if item["user_name"] != user_name:
                     room["game_data"]["waiting_for"].append(dict(kind='challenge', user_name=item["user_name"]))
+        elif action == "challenge":
+            for item in reversed(room["game_data"]["action_log"]):
+                if item["action"] in ["income", "foreign_aid", "tax", "steal", "assassin", "exchange", "coup", "block"]:
+                    challenged_user = item["user_name"]
+                    break
+            room["game_data"]["waiting_for"].append(dict(kind='reveal', user_name=challenged_user))
 
 
         return room["game_data"]
@@ -220,6 +231,9 @@ def mongo():
     modify_room('sk', 'play_action', params=dict(user_name="p1", action="allow"))
     modify_room('sk', 'play_action', params=dict(user_name="p3", action="allow"))
     modify_room('sk', 'play_action', params=dict(user_name="p4", action="allow"))
+    modify_room('sk', 'play_action', params=dict(user_name="p2", action="foreign_aid"))
+    modify_room('sk', 'play_action', params=dict(user_name="p1", action="block")) # another rightful duke doing a righteous challenge
+    modify_room('sk', 'play_action', params=dict(user_name="p2", action="challenge")) # p2 makes an erroneous challenge
     myquery = dict()
     import pprint
     pp = pprint.PrettyPrinter(indent=4)
