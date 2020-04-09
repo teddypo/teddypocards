@@ -145,7 +145,16 @@ def mongo():
                 for player in room["game_data"]["players"]:
                     if player["user_name"] == user_name:
                         if reveal_index >= len(player["cards"]):
-                            print('notallowed')
+                            allowed=False
+                        else:
+                            room["game_data"]["waiting_for"] = []
+                            allowed = True
+                        break
+            elif action.startswith("discard") and item["kind"] == "discard" and item["user_name"] == user_name:
+                discard_index = int(action.replace("discard", ""))
+                for player in room["game_data"]["players"]:
+                    if player["user_name"] == user_name:
+                        if discard_index >= len(player["cards"]):
                             allowed=False
                         else:
                             room["game_data"]["waiting_for"] = []
@@ -158,7 +167,7 @@ def mongo():
         room["game_data"]["action_log"].append(params)
 
         # Backup the game state (for potential blocks)
-        if action != "allow" and action != "challenge" and not action.startswith("reveal"):
+        if action != "allow" and action != "challenge" and not action.startswith("reveal") and not action.startswith('discard'):
             # action and challenge dont change game state and shouldnt blow away valuable saved backup
             # harmless for income to do a backup
             # required for foreign aid to do a backup
@@ -173,6 +182,14 @@ def mongo():
                 item["coins"] += 1
             elif action == "foreign_aid" and item["user_name"] == user_name:
                 item["coins"] += 2
+            elif action.startswith('discard') and item["user_name"] == user_name:
+                discard_index = int(action.replace("discard", ""))
+                for player in room["game_data"]["players"]:
+                    if player["user_name"] == user_name:
+                        card = player["cards"].pop(discard_index)
+                        room["game_data"]["grave_yard"].append(card)
+                        break
+
         if action == "block":
             room["game_data"]["players"] = temp_backup
         elif action.startswith("reveal"):
@@ -282,6 +299,13 @@ def mongo():
                         next_player = get_next_player_name(room["game_data"], item["user_name"])
                         break
                 room["game_data"]["waiting_for"].append(dict(kind='turn', user_name=next_player))
+        elif action.startswith("discard"):
+            # Challenge is over - the false accuser was punished lets move the game along
+            for item in reversed(room["game_data"]["action_log"]):
+                if item["action"] in ["income", "foreign_aid", "tax", "steal", "assassin", "exchange", "coup"]:
+                    next_player = get_next_player_name(room["game_data"], item["user_name"])
+                    break
+            room["game_data"]["waiting_for"].append(dict(kind='turn', user_name=next_player))
 
 
         return room["game_data"]
@@ -320,6 +344,7 @@ def mongo():
     modify_room('sk', 'play_action', params=dict(user_name="p1", action="block")) # another rightful duke doing a righteous challenge
     modify_room('sk', 'play_action', params=dict(user_name="p2", action="challenge")) # p2 makes an erroneous challenge
     modify_room('sk', 'play_action', params=dict(user_name="p1", action="reveal0")) # p1 prooves he is the duke
+    modify_room('sk', 'play_action', params=dict(user_name="p2", action="discard0")) # gotta pay for your erroneous challenge
     myquery = dict()
     for item in rooms.find(myquery):
         pp.pprint(item)
