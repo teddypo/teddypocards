@@ -26,6 +26,7 @@ def mongo():
         game_params = dict()
         if game_name == 'Overthrown':
             game_params["approval_timer"] = "disabled"
+            # game_params["approval_timer"] = "infinite"
         return rooms.insert_one(dict(room_name=room_name,
             game_master=game_master,
             is_private=is_private,
@@ -124,6 +125,9 @@ def mongo():
             if action == "income" and item["kind"] == "turn" and item["user_name"] == user_name:
                 room["game_data"]["waiting_for"] = []
                 allowed = True
+            elif action == "foreign_aid" and item["kind"] == "turn" and item["user_name"] == user_name:
+                room["game_data"]["waiting_for"] = []
+                allowed = True
         if not allowed:
             return None
 
@@ -138,11 +142,21 @@ def mongo():
         for item in players:
             if action == "income" and item["user_name"] == user_name:
                 item["coins"] += 1
+            if action == "foreign_aid" and item["user_name"] == user_name:
+                item["coins"] += 2
 
         # Add next actions people game can wait for
         if action == 'income':
             next_player = get_next_player_name(room["game_data"], user_name)
             room["game_data"]["waiting_for"].append(dict(kind='turn', user_name=next_player))
+        elif action == 'foreign_aid':
+            if room["game_params"]["approval_timer"] == "disabled":
+                next_player = get_next_player_name(room["game_data"], user_name)
+                room["game_data"]["waiting_for"].append(dict(kind='turn', user_name=next_player))
+            for item in room["game_data"]["players"]:
+                if item["user_name"] != user_name:
+                    room["game_data"]["waiting_for"].append(dict(kind='block', user_name=item["user_name"]))
+
 
         return room["game_data"]
 
@@ -161,6 +175,10 @@ def mongo():
     action_params = dict()
     action_params["user_name"] = "p3"
     action_params["action"] = "income"
+    modify_room('sk', 'play_action', action_params)
+    action_params = dict()
+    action_params["user_name"] = "p4"
+    action_params["action"] = "foreign_aid"
     modify_room('sk', 'play_action', action_params)
     myquery = dict()
     import pprint
