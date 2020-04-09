@@ -18,7 +18,11 @@
     var game_name = "{{room_name}}";
 var penalize_me = "{{ penalize == user_name}}" == "True"
 </script>
+{% if alternate_js %}
+<script src="{{url_for('static', filename='mongo_scripts.js')}}"></script>
+{% else %}
 <script src="{{url_for('static', filename='scripts.js')}}"></script>
+{% endif %}
 {% block headaddons %}{% endblock %}
 </head>
 <body>
