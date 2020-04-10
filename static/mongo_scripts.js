@@ -35,6 +35,14 @@ $(document).ready(function(){
             })
         }
     });
+    $('#reset_game_button').on('click', function(e){
+        socket.emit('play action', {
+                action: 'reset_game',
+                user_name: user_name,
+                room_name: room_name
+        })
+        alert('tell all your players to refresh if anybody new has joined')
+    });
     var updateUIGameState = function(game_data){
         var players = game_data.players
         var is_my_turn = false

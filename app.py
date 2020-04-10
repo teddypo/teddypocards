@@ -142,6 +142,8 @@ class RC:
             players.append(user_name)
             newvalues = {"$set": {"players": players}}
             self.rooms.update_one(myquery, newvalues)
+        print(room)
+        return room is not None
     def modify_room(self, room_name, action, params=dict()):
         changed = False
         query={"room_name": room_name}
@@ -200,7 +202,7 @@ class RC:
                     player["cards"].append(deck.pop())
             players.append(player)
         grave_yard = []
-        action_log = []
+        action_log = [dict(user_name=room["game_master"], action="started")]
         if len(players) > 0:
             waiting_for = [dict(kind='turn', user_name=random.choice(players)["user_name"])]
         else:
@@ -503,6 +505,13 @@ def play_action(json):
     print('rx msg '  + str(json))
     rooms = mydb["room"]
     rc = RC(rooms)
+
+    print(json["action"])
+    if "action" in json and json["action"] == "reset_game" and "room_name" in json:
+        rc.modify_room(json["room_name"], 'waiting')
+        rc.modify_room(json["room_name"], 'started')
+
+
     if "room_name" in json and "user_name"  in json and "action" in json:
         truth = rc.modify_room(json["room_name"], 'play_action', params=dict(user_name=json["user_name"], action=json["action"]))
         print (truth)
@@ -516,6 +525,7 @@ def get_game_state(user_name, room_name, to_jsonify=True):
     rooms = mydb["room"]
     room = rooms.find_one({"room_name": room_name})
     game_data = room["game_data"]
+    game_data["game_master"] = room["game_master"]
     #for item in game_data["players"]: # commend this out for now, we'd prefer to have cards totally hidden from web clients but i want the game to work first
     #    if item["user_name"] != user_name:
     #        for i, card in enumerate(item["cards"]):
@@ -535,6 +545,7 @@ def mongo_play_page(user_name, room_name):
     game_data = get_game_state(user_name, room_name, to_jsonify=False)
     kwargs = dict(user_name=user_name,
             room_name=room_name,
+            game_master=game_data["game_master"],
             players=game_data["players"],
             activity_log=game_data["action_log"],
             waiting_for = game_data["waiting_for"],
@@ -813,44 +824,50 @@ def join():
         room_name = str(escape(request.values['public_room_name']))
     else:
         room_name = str(escape(request.values['room_name']))
-    with open(db_prefix+'state.json', "r") as statef:
-        state = json.load(statef)
-    room = state.get('rooms', dict(room_name=None)).get(room_name, None)
-    if room is None:
-        return "Room Not Found" # TODO
-    game_data = room.get("game_data", dict())
-    players = game_data.get('players', [])
-    def user_exists():
-        for item in game_data.get('players', []):
-            if item['user_name'] == user_name:
-                return True
-        return False
 
-    print('join')
-    if not user_exists():
-        print('join')
-        players.append(dict(user_name = user_name, n_coins = 2, cards = []))
-        game_data['players'] = players
-        if len(game_data['deck']) > 0:
-            random.shuffle(game_data['deck'])
-            card = game_data['deck'].pop()
-            card['hidden'] = True
-            for player in game_data.get('players', []):
-                if player['user_name'] == user_name:
-                    player['cards'].append(card)
-        if len(game_data['deck']) > 0:
-            random.shuffle(game_data['deck'])
-            card = game_data['deck'].pop()
-            card['hidden'] = True
-            for player in game_data.get('players', []):
-                if player['user_name'] == user_name:
-                    player['cards'].append(card)
-    if "turn" not in game_data:
-        game_data["turn"] = 0
-    with open(db_prefix+'state.json', "w") as statef:
-        print('c')
-        json.dump(state, statef)
-    return redirect(url_for('play_page', user_name=user_name, room_name=room_name))
+    rooms = mydb["room"]
+    rc = RC(rooms)
+    room = rc.join_room(room_name, user_name)
+    print(room)
+
+    #with open(db_prefix+'state.json', "r") as statef:
+    #    state = json.load(statef)
+    #room = state.get('rooms', dict(room_name=None)).get(room_name, None)
+    if room == False:
+        return "Room Not Found" # TODO
+    #game_data = room.get("game_data", dict())
+    #players = game_data.get('players', [])
+    #def user_exists():
+    #    for item in game_data.get('players', []):
+    #        if item['user_name'] == user_name:
+    #            return True
+    #    return False
+
+    #print('join')
+    #if not user_exists():
+    #    print('join')
+    #    players.append(dict(user_name = user_name, n_coins = 2, cards = []))
+    #    game_data['players'] = players
+    #    if len(game_data['deck']) > 0:
+    #        random.shuffle(game_data['deck'])
+    #        card = game_data['deck'].pop()
+    #        card['hidden'] = True
+    #        for player in game_data.get('players', []):
+    #            if player['user_name'] == user_name:
+    #                player['cards'].append(card)
+    #    if len(game_data['deck']) > 0:
+    #        random.shuffle(game_data['deck'])
+    #        card = game_data['deck'].pop()
+    #        card['hidden'] = True
+    #        for player in game_data.get('players', []):
+    #            if player['user_name'] == user_name:
+    #                player['cards'].append(card)
+    #if "turn" not in game_data:
+    #    game_data["turn"] = 0
+    #with open(db_prefix+'state.json', "w") as statef:
+    #    print('c')
+    #    json.dump(state, statef)
+    return redirect(url_for('mongo_play_page', user_name=user_name, room_name=room_name))
 
 def main():
     global db_prefix

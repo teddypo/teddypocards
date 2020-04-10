@@ -139,6 +139,8 @@
     </div>
   </div>
 </div>
-<button data-toggle="modal" data-target="#discardCardModal">LaunchTestModal</button>
+{% if user_name == game_master %}
+<button id="reset_game_button">Reset Game</button>
+{% endif %}
 </div>
 {% endblock %}
