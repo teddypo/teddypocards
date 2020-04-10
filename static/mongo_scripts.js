@@ -66,11 +66,10 @@ $(document).ready(function(){
             }
             $('#coins'+i).text(players[i].coins)
             for (var j = 0; j < 2; j++){
-               // TODO FIX THIS. Right now the cards update for other people is screwed up
                if (j >= players[i].cards.length){
-                   $('#mycard'+j).empty()
+                   $('#card_'+players[i].user_name+'_'+j).empty()
                }else{
-                   $('#mycard'+j).text(players[i].cards[j].name)
+                   $('#card_'+players[i].user_name+'_'+j).text(players[i].cards[j])
                }
             }
         }

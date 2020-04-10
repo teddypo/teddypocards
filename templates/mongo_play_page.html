@@ -27,9 +27,9 @@
                 <td scope="col" id="coins{{loop.index0}}">{{player.coins}}</td>
 				{% for i in range(2) %}
 				{% if player.cards|length < (i+1) %}
-				<td scope="col"></td>
+                <td scope="col" id="card_{{player.user_name}}_{{loop.index0}}"></td>
 				{% else%}
-				<td scope="col"><b>{{player.cards[i]}}</b></td>
+                <td scope="col" id="card_{{player.user_name}}_{{loop.index0}}">{{player.cards[i]}}</td>
 				{% endif %}
 				{% endfor %}
 			</tr>
