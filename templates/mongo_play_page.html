@@ -117,20 +117,24 @@
 
 
 </div>
-<div class="modal fade" id="discardCardModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+<div class="modal fade" id="discardCardModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="modal_header_text" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="staticBackdropLabel">Death</h5>
+        <h5 class="modal-title" id="modal_header_text"></h5>
       </div>
       <div class="modal-body">
-	<p>You've been killed...Assassinations can be challanged and blocked. Infects cannot. You must challange, block, or choose a card to discard</p>
+        <p id="modal_body_text"></p>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-danger" data-dismiss="modal">Challange</button>
-        <button type="button" class="btn btn-dark" data-dismiss="modal">Block</button>
-        <button type="button" class="btn btn-success" data-dismiss="modal" id="discard0">DiscardCard1</button>
-        <button type="button" class="btn btn-success" data-dismiss="modal" id="discard1">DiscardCard2</button>
+        <button type="button" class="btn btn-danger d-none aux_button" data-dismiss="modal" id="modal_challenge" data-action="challenge">Challange</button>
+        <button type="button" class="btn btn-dark d-none aux_button" data-dismiss="modal" id="modal_block" data-action="block">Block</button>
+        <button type="button" class="btn btn-success d-none aux_button" data-dismiss="modal" id="modal_discard0" data-action="discard0" data-index="0">DiscardCard1</button>
+        <button type="button" class="btn btn-success d-none aux_button" data-dismiss="modal" id="modal_discard1" data-action="discard1" data-index="1">DiscardCard2</button>
+        <button type="button" class="btn btn-success d-none aux_button" data-dismiss="modal" id="modal_discard2" data-action="discard2" data-index="2">DiscardCard3</button>
+        <button type="button" class="btn btn-success d-none aux_button" data-dismiss="modal" id="modal_discard3" data-action="discard3" data-index="3">DiscardCard4</button>
+        <button type="button" class="btn btn-success d-none aux_button" data-dismiss="modal" id="modal_reveal0" data-action="reveal0" data-index="3">RevealCard1</button>
+        <button type="button" class="btn btn-success d-none aux_button" data-dismiss="modal" id="modal_reveal1" data-action="reveal1" data-index="3">RevealCard2</button>
       </div>
     </div>
   </div>

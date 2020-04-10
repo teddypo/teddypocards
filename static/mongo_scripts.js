@@ -53,6 +53,104 @@ $(document).ready(function(){
             var lab = $('#wait_for_lab').clone()
             lab.text(game_data.waiting_for[i].user_name + ' ' + game_data.waiting_for[i].kind)
             $('#wait_for_children').append(lab)
+            if (game_data.waiting_for[i].user_name == user_name && game_data.waiting_for[i].kind == 'discard'){
+                // youve been assassinated or infected or lost a challenge
+                for (var j = game_data.action_log.length - 1; j >= 0; j--){
+                    var doer = game_data.action_log[j]['user_name']
+                    if (game_data["action_log"][j]['action'].startsWith('assassinate')){
+                        // It was an assassination
+                        $('#modal_header_text').text('Assassinated')
+                        $('#modal_body_text').text("You've been assassinated by "+doer+". You must block, challenge, or choose a card to discard")
+                        $('#modal_challenge').removeClass('d-none')
+                        $('#modal_block').removeClass('d-none')
+                        // TODO UPDATE THE DISCARD BUTTONS WITH THE CARD NAMES
+                        $('#modal_discard0').removeClass('d-none')
+                        $('#modal_discard1').removeClass('d-none')
+                        $('#modal_discard2').addClass('d-none')
+                        $('#modal_discard3').addClass('d-none')
+                        $('#modal_reveal0').addClass('d-none')
+                        $('#modal_reveal1').addClass('d-none')
+                        $('#discardCardModal').modal('show')
+                        break;
+                    }
+                    if (game_data["action_log"][j]['action'].startsWith('infect')){
+                        // It was an infect
+                        $('#modal_header_text').text('Infected')
+                        $('#modal_body_text').text("You've been infected by "+doer+". Which cant be blocked or challenged. Choose a card to discard")
+                        $('#modal_challenge').addClass('d-none')
+                        $('#modal_block').addClass('d-none')
+                        // TODO UPDATE THE DISCARD BUTTONS WITH THE CARD NAMES
+                        $('#modal_discard0').removeClass('d-none')
+                        $('#modal_discard1').removeClass('d-none')
+                        $('#modal_discard2').addClass('d-none')
+                        $('#modal_discard3').addClass('d-none')
+                        $('#modal_reveal0').addClass('d-none')
+                        $('#modal_reveal1').addClass('d-none')
+                        $('#discardCardModal').modal('show')
+                        break;
+                    }
+                    if (game_data["action_log"][j]['action'] == "challenge"){
+                        // You've lost a challenge
+                        $('#modal_header_text').text('Challenge Failed')
+                        $('#modal_body_text').text("Your challenge failed, choose a card to send to the graveyard")
+                        $('#modal_challenge').addClass('d-none')
+                        $('#modal_block').addClass('d-none')
+                        // TODO UPDATE THE DISCARD BUTTONS WITH THE CARD NAMES
+                        $('#modal_discard0').removeClass('d-none')
+                        $('#modal_discard1').removeClass('d-none')
+                        $('#modal_discard2').addClass('d-none')
+                        $('#modal_discard3').addClass('d-none')
+                        $('#modal_reveal0').addClass('d-none')
+                        $('#modal_reveal1').addClass('d-none')
+                        $('#discardCardModal').modal('show')
+                        break;
+                    }
+                }
+            }
+            if (game_data.waiting_for[i].user_name == user_name && game_data.waiting_for[i].kind == 'doublediscard' && ! $('#discardCardModal').hasClass('show')){
+                // you gotta finish your exchange
+                $('#modal_header_text').text('Exchange')
+                $('#modal_body_text').text("You've elected to exchange. Select two cards to return to the deck")
+                $('#modal_challenge').addClass('d-none')
+                $('#modal_block').addClass('d-none')
+                // TODO UPDATE THE DISCARD BUTTONS WITH THE CARD NAMES
+                $('#modal_discard0').removeClass('d-none')
+                $('#modal_discard1').removeClass('d-none')
+                $('#modal_discard2').removeClass('d-none')
+                $('#modal_discard3').removeClass('d-none')
+                $('#modal_reveal0').addClass('d-none')
+                $('#modal_reveal1').addClass('d-none')
+                var cards_clicked = []
+                $('[id^=modal_discard]').on('click', function(e){
+                        $(e.target).addClass('d-none')
+                        cards_clicked.push($(e.target).data('index'))
+                        if(cards_clicked.length < 2){
+                            e.stopPropagation()
+                        }else{
+                            action = 'doublediscard' + cards_clicked[0] + '_' + cards_clicked[1];
+                            socket.emit('play action', {
+                                action: action,
+                                user_name: user_name,
+                                room_name: room_name
+                            })
+                        }
+                });
+                $('#discardCardModal').modal('show')
+            }
+            if (game_data.waiting_for[i].user_name == user_name && game_data.waiting_for[i].kind == 'reveal'){
+                // you've been challenged
+                $('#modal_header_text').text('Challenged')
+                $('#modal_body_text').text("You've been challanged. You must choose a card to reveal")
+                $('#modal_challenge').addClass('d-none')
+                $('#modal_block').addClass('d-none')
+                $('#modal_discard0').addClass('d-none')
+                $('#modal_discard1').addClass('d-none')
+                $('#modal_discard2').addClass('d-none')
+                $('#modal_discard3').addClass('d-none')
+                $('#modal_reveal0').removeClass('d-none')
+                $('#modal_reveal1').removeClass('d-none')
+                $('#discardCardModal').modal('show')
+            }
         }
         for (var i = 0; i < players.length; i++){
             if (i == game_data.turn){

@@ -370,10 +370,11 @@ class RC:
             elif challenged_action.startswith('steal'):
                 if revealed_card == 'Captain':
                     claim_prooved = True
-            elif challenged_action.startwith('assassinate'):
+            elif challenged_action.startswith('assassinate'):
                 if revealed_card == "Assassin":
                     claim_prooved = True
             elif challenged_action == 'exchange':
+                # TODO FIX THE CHALLENGE ORDER OF EXCHANGE BECAUSE YOU NEED TO REVEAL WITH PREV CARDS
                 if revealed_card == 'Ambassador':
                     claim_prooved = True
             if claim_prooved:
@@ -503,6 +504,7 @@ def play_action(json):
     if "room_name" in json and "user_name"  in json and "action" in json:
         truth = rc.modify_room(json["room_name"], 'play_action', params=dict(user_name=json["user_name"], action=json["action"]))
         print (truth)
+        # TODO FIX THIS ALL PLAYERS PEEK MY CARD WHEN I EMIT MY TURN IS OVER
         emit('update', get_game_state(json["user_name"], json["room_name"], to_jsonify=False), room=json["room_name"])
 
 
