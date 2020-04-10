@@ -506,7 +506,6 @@ def play_action(json):
     if "room_name" in json and "user_name"  in json and "action" in json:
         truth = rc.modify_room(json["room_name"], 'play_action', params=dict(user_name=json["user_name"], action=json["action"]))
         print (truth)
-        # TODO FIX THIS ALL PLAYERS PEEK MY CARD WHEN I EMIT MY TURN IS OVER
         emit('update', get_game_state(json["user_name"], json["room_name"], to_jsonify=False), room=json["room_name"])
 
 
@@ -517,10 +516,10 @@ def get_game_state(user_name, room_name, to_jsonify=True):
     rooms = mydb["room"]
     room = rooms.find_one({"room_name": room_name})
     game_data = room["game_data"]
-    for item in game_data["players"]:
-        if item["user_name"] != user_name:
-            for i, card in enumerate(item["cards"]):
-                item["cards"][i] = "hidden"
+    #for item in game_data["players"]: # commend this out for now, we'd prefer to have cards totally hidden from web clients but i want the game to work first
+    #    if item["user_name"] != user_name:
+    #        for i, card in enumerate(item["cards"]):
+    #            item["cards"][i] = "hidden"
     for i, item in enumerate(game_data["deck"]):
         game_data["deck"][i] = "hidden"
     if room["game_params"]["keep_grave_sorted"]:

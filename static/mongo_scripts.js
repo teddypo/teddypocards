@@ -199,19 +199,12 @@ $(document).ready(function(){
             }
         }
         for (var i = 0; i < players.length; i++){
-            if (i == game_data.turn){
-                $('#user_row'+i).removeClass('table-success')
-                $('#user_row'+i).addClass('table-primary')
-            }else if(players[i].user_name == user_name){
-                $('#user_row'+i).removeClass('table-primary')
-                $('#user_row'+i).addClass('table-success')
-            }else{
-                $('#user_row'+i).removeClass('table-primary')
-            }
             $('#coins'+i).text(players[i].coins)
             for (var j = 0; j < 2; j++){
                if (j >= players[i].cards.length){
                    $('#card_'+players[i].user_name+'_'+j).empty()
+               }else if (players[i].user_name != user_name){
+                   $('#card_'+players[i].user_name+'_'+j).text('hidden')
                }else{
                    $('#card_'+players[i].user_name+'_'+j).text(players[i].cards[j])
                }
