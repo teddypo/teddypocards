@@ -317,8 +317,8 @@ class RC:
                 tmp = action.replace("doublediscard", "")
                 idxes = sorted(list(int(i) for i in tmp.split("_")))
                 # do sorting then back to front for indexing issues
-                room["game_data"]["grave_yard"].append(item["cards"].pop(idxes[1]))
-                room["game_data"]["grave_yard"].append(item["cards"].pop(idxes[0]))
+                room["game_data"]["deck"].append(item["cards"].pop(idxes[1]))
+                room["game_data"]["deck"].append(item["cards"].pop(idxes[0]))
             elif action.startswith('infect') and item["user_name"] == user_name:
                 item["coins"] -= 7
             elif action.startswith('discard') and item["user_name"] == user_name:
@@ -375,7 +375,6 @@ class RC:
                     claim_prooved = True
             elif challenged_action == 'exchange':
                 # TODO FIX THE CHALLENGE ORDER OF EXCHANGE BECAUSE YOU NEED TO REVEAL WITH PREV CARDS
-                # ALSO DOUBLEDISCARD SHOULD BE PUTTING THINGS IN THE DECK NOT GRAVE
                 if revealed_card == 'Ambassador':
                     claim_prooved = True
             if claim_prooved:
