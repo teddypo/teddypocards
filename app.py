@@ -306,6 +306,7 @@ class RC:
             elif action == "tax" and item["user_name"] == user_name:
                 item["coins"] += 3
             elif action == "exchange" and item["user_name"] == user_name:
+                room["game_data"]["pre_exchange_cards"] = copy.deepcopy(item["cards"])
                 deck = room["game_data"]["deck"]
                 if len(deck) > 0:
                     random.shuffle(deck)
@@ -353,6 +354,8 @@ class RC:
                 if user_name == item["user_name"]:
                     revealed_card = item["cards"].pop(reveal_index)
                     break
+            if challenged_action == 'exchange':
+                revealed_card = room["game_data"]["pre_exchange_cards"][reveal_index]
             claim_prooved = False
             if challenged_action == 'block':
                 if preblock_action == 'foreign_aid':
@@ -374,7 +377,6 @@ class RC:
                 if revealed_card == "Assassin":
                     claim_prooved = True
             elif challenged_action == 'exchange':
-                # TODO FIX THE CHALLENGE ORDER OF EXCHANGE BECAUSE YOU NEED TO REVEAL WITH PREV CARDS
                 if revealed_card == 'Ambassador':
                     claim_prooved = True
             if claim_prooved:

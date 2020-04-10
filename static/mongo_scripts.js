@@ -159,6 +159,20 @@ $(document).ready(function(){
             }
             if (game_data.waiting_for[i].user_name == user_name && game_data.waiting_for[i].kind == 'reveal'){
                 // you've been challenged
+                var log = game_data["action_log"]
+                var was_exchange = false
+                for (var j = log.length - 1; i >= 0; j--){
+                    if (log[j].action == 'exchange'){
+                        was_exchange = true;
+                        break;
+                    }
+                    if ( ! log[j].action.startsWith('doublediscard') &&
+                         ! log[j].action.startsWith('allow') &&
+                         ! log[j].action.startsWith('challenge')){
+                        // these are the only things that could have happened between now and the exchange
+                        break
+                    }
+                }
                 $('#modal_header_text').text('Challenged')
                 $('#modal_body_text').text("You've been challanged. You must choose a card to reveal")
                 $('#modal_challenge').addClass('d-none')
@@ -168,6 +182,10 @@ $(document).ready(function(){
                 $('#modal_discard2').addClass('d-none')
                 $('#modal_discard3').addClass('d-none')
                 var my_cards = players.filter(player => player.user_name == user_name)[0].cards
+                console.log(was_exchange)
+                if (was_exchange){
+                    my_cards = game_data["pre_exchange_cards"]
+                }
                 for (var k = 0; k < 2; k++){
                     if (k < my_cards.length){
                         $('#modal_reveal'+k).text('Reveal ' + my_cards[k])
