@@ -375,6 +375,7 @@ class RC:
                     claim_prooved = True
             elif challenged_action == 'exchange':
                 # TODO FIX THE CHALLENGE ORDER OF EXCHANGE BECAUSE YOU NEED TO REVEAL WITH PREV CARDS
+                # ALSO DOUBLEDISCARD SHOULD BE PUTTING THINGS IN THE DECK NOT GRAVE
                 if revealed_card == 'Ambassador':
                     claim_prooved = True
             if claim_prooved:

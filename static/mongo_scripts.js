@@ -63,11 +63,16 @@ $(document).ready(function(){
                         $('#modal_body_text').text("You've been assassinated by "+doer+". You must block, challenge, or choose a card to discard")
                         $('#modal_challenge').removeClass('d-none')
                         $('#modal_block').removeClass('d-none')
-                        // TODO UPDATE THE DISCARD BUTTONS WITH THE CARD NAMES
-                        $('#modal_discard0').removeClass('d-none')
-                        $('#modal_discard1').removeClass('d-none')
-                        $('#modal_discard2').addClass('d-none')
-                        $('#modal_discard3').addClass('d-none')
+                        var my_cards = players.filter(player => player.user_name == user_name)[0].cards
+                        for (var k = 0; k < 4; k++){
+                            if (k < my_cards.length){
+                                $('#modal_discard'+k).text('Discard ' + my_cards[k])
+                                $('#modal_discard' + k).removeClass('d-none')
+                            }else{
+                                $('#modal_discard'+k).empty()
+                                $('#modal_discard' + k).addClass('d-none')
+                            }
+                        }
                         $('#modal_reveal0').addClass('d-none')
                         $('#modal_reveal1').addClass('d-none')
                         $('#discardCardModal').modal('show')
@@ -79,11 +84,16 @@ $(document).ready(function(){
                         $('#modal_body_text').text("You've been infected by "+doer+". Which cant be blocked or challenged. Choose a card to discard")
                         $('#modal_challenge').addClass('d-none')
                         $('#modal_block').addClass('d-none')
-                        // TODO UPDATE THE DISCARD BUTTONS WITH THE CARD NAMES
-                        $('#modal_discard0').removeClass('d-none')
-                        $('#modal_discard1').removeClass('d-none')
-                        $('#modal_discard2').addClass('d-none')
-                        $('#modal_discard3').addClass('d-none')
+                        var my_cards = players.filter(player => player.user_name == user_name)[0].cards
+                        for (var k = 0; k < 4; k++){
+                            if (k < my_cards.length){
+                                $('#modal_discard'+k).text('Discard ' + my_cards[k])
+                                $('#modal_discard' + k).removeClass('d-none')
+                            }else{
+                                $('#modal_discard'+k).empty()
+                                $('#modal_discard' + k).addClass('d-none')
+                            }
+                        }
                         $('#modal_reveal0').addClass('d-none')
                         $('#modal_reveal1').addClass('d-none')
                         $('#discardCardModal').modal('show')
@@ -95,11 +105,16 @@ $(document).ready(function(){
                         $('#modal_body_text').text("Your challenge failed, choose a card to send to the graveyard")
                         $('#modal_challenge').addClass('d-none')
                         $('#modal_block').addClass('d-none')
-                        // TODO UPDATE THE DISCARD BUTTONS WITH THE CARD NAMES
-                        $('#modal_discard0').removeClass('d-none')
-                        $('#modal_discard1').removeClass('d-none')
-                        $('#modal_discard2').addClass('d-none')
-                        $('#modal_discard3').addClass('d-none')
+                        var my_cards = players.filter(player => player.user_name == user_name)[0].cards
+                        for (var k = 0; k < 4; k++){
+                            if (k < my_cards.length){
+                                $('#modal_discard'+k).text('Discard ' + my_cards[k])
+                                $('#modal_discard' + k).removeClass('d-none')
+                            }else{
+                                $('#modal_discard'+k).empty()
+                                $('#modal_discard' + k).addClass('d-none')
+                            }
+                        }
                         $('#modal_reveal0').addClass('d-none')
                         $('#modal_reveal1').addClass('d-none')
                         $('#discardCardModal').modal('show')
@@ -113,11 +128,16 @@ $(document).ready(function(){
                 $('#modal_body_text').text("You've elected to exchange. Select two cards to return to the deck")
                 $('#modal_challenge').addClass('d-none')
                 $('#modal_block').addClass('d-none')
-                // TODO UPDATE THE DISCARD BUTTONS WITH THE CARD NAMES
-                $('#modal_discard0').removeClass('d-none')
-                $('#modal_discard1').removeClass('d-none')
-                $('#modal_discard2').removeClass('d-none')
-                $('#modal_discard3').removeClass('d-none')
+                var my_cards = players.filter(player => player.user_name == user_name)[0].cards
+                for (var k = 0; k < 4; k++){
+                    if (k < my_cards.length){
+                        $('#modal_discard'+k).text('Discard ' + my_cards[k])
+                        $('#modal_discard' + k).removeClass('d-none')
+                    }else{
+                        $('#modal_discard'+k).empty()
+                        $('#modal_discard' + k).addClass('d-none')
+                    }
+                }
                 $('#modal_reveal0').addClass('d-none')
                 $('#modal_reveal1').addClass('d-none')
                 var cards_clicked = []
@@ -147,8 +167,16 @@ $(document).ready(function(){
                 $('#modal_discard1').addClass('d-none')
                 $('#modal_discard2').addClass('d-none')
                 $('#modal_discard3').addClass('d-none')
-                $('#modal_reveal0').removeClass('d-none')
-                $('#modal_reveal1').removeClass('d-none')
+                var my_cards = players.filter(player => player.user_name == user_name)[0].cards
+                for (var k = 0; k < 2; k++){
+                    if (k < my_cards.length){
+                        $('#modal_reveal'+k).text('Reveal ' + my_cards[k])
+                        $('#modal_reveal' + k).removeClass('d-none')
+                    }else{
+                        $('#modal_reveal'+k).empty()
+                        $('#modal_reveal' + k).addClass('d-none')
+                    }
+                }
                 $('#discardCardModal').modal('show')
             }
         }
