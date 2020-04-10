@@ -772,45 +772,51 @@ def create():
         room_name = 'room'+str(uuid.uuid4().hex)[0:8]
     is_private = escape(request.form.get('is_private', ''))
     game_name = escape(request.form.get('game_name', ''))
-    if game_name == "Spanish Flu":
-        with open(db_prefix+'state_base.json', "r") as statef:
-            game_data = json.load(statef)
-        game_init = copy.deepcopy(game_data)
-        players=game_data.get('players', [])
-        players.append(dict(user_name = user_name, n_coins = 2, cards = []))
-        game_data['players'] = players
-        if len(game_data['deck']) > 0:
-            random.shuffle(game_data['deck'])
-            card = game_data['deck'].pop()
-            card['hidden'] = True
-            for player in game_data.get('players', []):
-                if player['user_name'] == user_name:
-                    player['cards'].append(card)
-        if len(game_data['deck']) > 0:
-            random.shuffle(game_data['deck'])
-            card = game_data['deck'].pop()
-            card['hidden'] = True
-            for player in game_data.get('players', []):
-                if player['user_name'] == user_name:
-                    player['cards'].append(card)
-    else:
-        game_data = dict()
-    if "turn" not in game_data:
-        game_data["turn"] = 0
-    room = dict(room_name = room_name,
-                game_master = user_name,
-                is_private = is_private,
-                game_name = game_name,
-                game_data = game_data,
-                game_init = game_init)
-    with open(db_prefix+'state.json', "r") as statef:
-        state = json.load(statef)
-    rooms = state.get('rooms', dict())
-    rooms[room_name] = room # Note duplicate rooms get clobbered fix that TODO
-    state['rooms'] = rooms
-    with open(db_prefix+'state.json', "w") as statef:
-        json.dump(state, statef)
-    return redirect(url_for('play_page', user_name=user_name, room_name=room_name))
+    #if game_name == "Spanish Flu":
+    #    with open(db_prefix+'state_base.json', "r") as statef:
+    #        game_data = json.load(statef)
+    #    game_init = copy.deepcopy(game_data)
+    #    players=game_data.get('players', [])
+    #    players.append(dict(user_name = user_name, n_coins = 2, cards = []))
+    #    game_data['players'] = players
+    #    if len(game_data['deck']) > 0:
+    #        random.shuffle(game_data['deck'])
+    #        card = game_data['deck'].pop()
+    #        card['hidden'] = True
+    #        for player in game_data.get('players', []):
+    #            if player['user_name'] == user_name:
+    #                player['cards'].append(card)
+    #    if len(game_data['deck']) > 0:
+    #        random.shuffle(game_data['deck'])
+    #        card = game_data['deck'].pop()
+    #        card['hidden'] = True
+    #        for player in game_data.get('players', []):
+    #            if player['user_name'] == user_name:
+    #                player['cards'].append(card)
+    #else:
+    #    game_data = dict()
+    #if "turn" not in game_data:
+    #    game_data["turn"] = 0
+    #room = dict(room_name = room_name,
+    #            game_master = user_name,
+    #            is_private = is_private,
+    #            game_name = game_name,
+    #            game_data = game_data,
+    #            game_init = game_init)
+    #with open(db_prefix+'state.json', "r") as statef:
+    #    state = json.load(statef)
+    #rooms = state.get('rooms', dict())
+    #rooms[room_name] = room # Note duplicate rooms get clobbered fix that TODO
+    #state['rooms'] = rooms
+    #with open(db_prefix+'state.json', "w") as statef:
+    #    json.dump(state, statef)
+    rooms = mydb["room"]
+    rc = RC(rooms)
+    room = rc.create_room(room_name, user_name, is_private, game_name)
+    rc.modify_room(room_name, 'waiting')
+    rc.modify_room(room_name, 'started')
+    print(room)
+    return redirect(url_for('mongo_play_page', user_name=user_name, room_name=room_name))
 @app.route('/join', methods=["GET", "POST"])
 def join():
     user_name = str(escape(request.values['user_name']))
