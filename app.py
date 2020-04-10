@@ -535,6 +535,8 @@ def mongo_play_page(user_name, room_name):
             players=game_data["players"],
             activity_log=game_data["action_log"],
             waiting_for = game_data["waiting_for"],
+            deck_size = len(game_data["deck"]),
+            grave_yard = game_data["grave_yard"],
             alternate_js=True)
     return render_template('mongo_play_page.html', **kwargs)
 

@@ -39,19 +39,23 @@
 	</div>
 	<div class="col-md-4">
 	  <ul class="list-group">
-		<li class="list-group-item">GraveYard</li>
-		{% for card in graveyard %}
-		<li class="list-group-item">{{card.name}}</li>
+		<li class="list-group-item" id="grave_yard_lab">GraveYard</li>
+        <div id="grave_yard_children">
+		{% for card in grave_yard %}
+		<li class="list-group-item">{{card}}</li>
 		{% endfor %}
+        </div>
 	  </ul>
 	  <ul class="list-group">
-		  <li class="list-group-item">Deck: {{deck_size}} cards</li>
+          <li class="list-group-item">Deck: <span id="deck_sz_lab">{{deck_size}}</span> cards</li>
 	  </ul>
 	  <ul class="list-group">
-		<li class="list-group-item">Waiting For</li>
+		<li class="list-group-item" id="wait_for_lab">Waiting For</li>
+        <div id="wait_for_children">
 		{% for item  in waiting_for %}
         <li class="list-group-item">{{item.user_name}} {{item.kind}}</li>
 		{% endfor %}
+        </div>
 	  </ul>
 	</div>
 	</div>
@@ -93,7 +97,8 @@
 	<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#expandedHistory" aria-controls="expandedHistory" aria-expanded="false"aria-label="Toggle longer history">
 		<span class="navbar-toggler-icon"></span>
 	</button>
-	<a class="navbar-brand" href="#" id="latest_activity">{{activity_log[activity_log|length - 1]}}</a>
+    {% set act = activity_log[activity_log|length - 1] %}
+    <a class="navbar-brand" href="#" id="latest_activity">{{act.user_name }} {{ act.action }} </a>
 	<form class="form-inline">
 		<button class="btn btn-outline-success aux_button" type="button" id="allow_button" data-action="allow">Allow</button>
 		<button class="btn btn-outline-danger aux_button" type="button" id="challenge_button" data-action="challenge">Challenge</button>
@@ -104,7 +109,7 @@
   <ul class="list-group" id="act_list">
     {% for item in activity_log|reverse %}
     {% if loop.index0 != 0 %}
-    <li class="list-group-item">{{item}}</li>
+    <li class="list-group-item">{{item.user_name}} {{ item.action}}</li>
     {% endif %}
     {% endfor %}
   </ul>
