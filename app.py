@@ -190,7 +190,7 @@ class RC:
 
     def create_game(room):
         deck = []
-        for item in ["Duke", "Cantessa", "Assassin", "Ambassador", "Captain"]:
+        for item in ["Duke", "Contessa", "Assassin", "Ambassador", "Captain"]:
             for i in range(3):
                 deck.append(item)
         random.shuffle(deck)
@@ -367,7 +367,7 @@ class RC:
                     if revealed_card == 'Captain' or revealed_card == "Ambassador":
                         claim_prooved = True
                 elif preblock_action.startswith('assassinate'):
-                    if revealed_card == 'Cantessa':
+                    if revealed_card == 'Contessa':
                         claim_prooved = True
             elif challenged_action == 'tax':
                 if revealed_card == 'Duke':
