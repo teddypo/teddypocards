@@ -451,9 +451,6 @@ class RC:
                 room["game_data"]["waiting_for"].append(dict(kind='turn', user_name=next_player))
             for item in room["game_data"]["players"]:
                 if item["user_name"] != user_name:
-                    room["game_data"]["waiting_for"].append(dict(kind='block', user_name=item["user_name"]))
-            for item in room["game_data"]["players"]:
-                if item["user_name"] != user_name:
                     room["game_data"]["waiting_for"].append(dict(kind='challenge', user_name=item["user_name"]))
         elif action.startswith('infect'):
             victim = action.replace('infect', '')
