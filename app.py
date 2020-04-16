@@ -518,7 +518,9 @@ def play_action(json):
     if "room_name" in json and "user_name"  in json and "action" in json:
         truth = rc.modify_room(json["room_name"], 'play_action', params=dict(user_name=json["user_name"], action=json["action"]))
         print (truth)
-        emit('update', get_game_state(json["user_name"], json["room_name"], to_jsonify=False), room=json["room_name"])
+        game_state = get_game_state(json["user_name"], json["room_name"], to_jsonify=False)
+        game_state['success'] = truth
+        emit('update', game_state, room=json["room_name"])
 
 
 @app.route('/get_game_state/<user_name>/<room_name>')

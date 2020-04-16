@@ -54,7 +54,12 @@ $(document).ready(function(){
     var hideLoadingModal = function(){
         $('#loadingModal').modal('hide')
     }
+    $('#messageModal').modal('hide')
     var updateUIGameState = function(game_data){
+        if ('success' in game_data && game_data['success'] == false){
+            $('#messageModalContent').text('Action not allowed. Try something else')
+            $('#messageModal').modal('show')
+        }
         var players = game_data.players
         var is_my_turn = false
         $('#deck_sz_lab').text(game_data.deck.length)
