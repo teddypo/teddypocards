@@ -424,7 +424,7 @@ class RC:
                 next_player = RC.get_next_player_name(room["game_data"], user_name)
                 room["game_data"]["waiting_for"].append(dict(kind='turn', user_name=next_player))
             for item in room["game_data"]["players"]:
-                if item["user_name"] != user_name:
+                if action.startswith('steal') and item["user_name"] == action.replace('steal', ''):
                     room["game_data"]["waiting_for"].append(dict(kind='block', user_name=item["user_name"]))
             for item in room["game_data"]["players"]:
                 if item["user_name"] != user_name:
