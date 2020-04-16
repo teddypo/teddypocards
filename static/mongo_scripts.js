@@ -182,7 +182,7 @@ $(document).ready(function(){
                     }
                 }
                 $('#modal_header_text').text('Challenged')
-                $('#modal_body_text').text("You've been challanged. You must choose a card to reveal")
+                $('#modal_body_text').text("You've been challenged. You must choose a card to reveal")
                 $('#modal_challenge').addClass('d-none')
                 $('#modal_block').addClass('d-none')
                 $('#modal_discard0').addClass('d-none')

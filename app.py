@@ -390,7 +390,7 @@ class RC:
                         if len(room["game_data"]["deck"]) > 0:
                             item["cards"].append(room["game_data"]["deck"].pop())
                 # the challenger must be punished
-                print('claim prooved - punish the challanger at the end of this function')
+                print('claim prooved - punish the challenger at the end of this function')
             else:
                 # Restore game state to before the saved (challenged) action
                 room["game_data"]["players"] = copy.deepcopy(room["game_data"]["prev_players"])
