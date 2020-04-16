@@ -139,6 +139,20 @@
     </div>
   </div>
 </div>
+<div class="modal" id="loadingModal" tabindex="-1" role="dialog" aria-labelledby="loadingModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="loadingModalLabel">Loading</h5>
+      </div>
+      <div class="modal-body">
+        <div class="spinner-border" role="status">
+          <span class="sr-only">Loading...</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 {% if user_name == game_master %}
 <button id="reset_game_button">Reset Game</button>
 {% endif %}

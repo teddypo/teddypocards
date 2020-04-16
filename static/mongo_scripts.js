@@ -13,11 +13,13 @@ $(document).ready(function(){
         console.log('update rxed')
         console.log(e)
         updateUIGameState(e)
+        hideLoadingModal()
 
     });
     $('.turn_button').on('click', function(e){
         action = $(e.target).data('action')
         if (action.length > 0){
+            showLoadingModal()
             socket.emit('play action', {
                     action: action,
                     user_name: user_name,
@@ -28,6 +30,7 @@ $(document).ready(function(){
     $('.aux_button').on('click', function(e){
         action = $(e.target).data('action')
         if (action.length > 0){
+            showLoadingModal()
             socket.emit('play action', {
                     action: action,
                     user_name: user_name,
@@ -36,6 +39,7 @@ $(document).ready(function(){
         }
     });
     $('#reset_game_button').on('click', function(e){
+        showLoadingModal()
         socket.emit('play action', {
                 action: 'reset_game',
                 user_name: user_name,
@@ -43,6 +47,13 @@ $(document).ready(function(){
         })
         alert('tell all your players to refresh if anybody new has joined')
     });
+    $('#loadingModal').modal('hide')
+    var showLoadingModal = function(){
+        $('#loadingModal').modal('show')
+    }
+    var hideLoadingModal = function(){
+        $('#loadingModal').modal('hide')
+    }
     var updateUIGameState = function(game_data){
         var players = game_data.players
         var is_my_turn = false
