@@ -238,7 +238,7 @@ class RC:
             elif action.startswith("steal") and item["kind"] == "turn" and item["user_name"] == user_name and coins < 10:
                 room["game_data"]["waiting_for"] = []
                 allowed = True
-            elif action.startswith("assassinate") and item["kind"] == "turn" and item["user_name"] == user_name and coins < 10:
+            elif action.startswith("assassinate") and item["kind"] == "turn" and item["user_name"] == user_name and coins < 10 and coins >= 3:
                 room["game_data"]["waiting_for"] = []
                 allowed = True
             elif action == "exchange" and item["kind"] == "turn" and item["user_name"] == user_name and coins < 10:
@@ -288,6 +288,12 @@ class RC:
 
         # Add the allowed action to the log
         room["game_data"]["action_log"].append(params)
+
+        # Modify cards and coins with turn actions that cant be undone
+        players = room["game_data"]["players"]
+        for item in players:
+            if action.startswith("assassinate") and item["user_name"] == user_name:
+                item["coins"] -= 3
 
         # Backup the game state (for potential blocks)
         if action != "allow" and action != "challenge" and not action.startswith("reveal") and not action.startswith('discard') and not action.startswith('doublediscard'):
